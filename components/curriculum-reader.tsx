@@ -116,6 +116,18 @@ export function CurriculumReader({ book }: { book: Book }) {
   );
 
   const progress = progressSummary.percentComplete;
+  const overviewSection = progressSummary.nextSection || progressSummary.currentSection;
+  const overviewActionLabel = progressSummary.isComplete
+    ? "Review last lesson"
+    : progressSummary.nextSection &&
+        progressSummary.nextSection.id !== progressSummary.currentSection?.id
+      ? "Continue to next lesson"
+      : "Continue from last lesson";
+  const overviewSectionLabel =
+    progressSummary.nextSection &&
+    progressSummary.nextSection.id !== progressSummary.currentSection?.id
+      ? "Next lesson"
+      : "Current lesson";
 
   const activeTopLevelSection = useMemo(() => {
     return (
@@ -302,7 +314,7 @@ export function CurriculumReader({ book }: { book: Book }) {
               <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs text-muted-foreground">
                 <span>
                   {progressSummary.completedCount} of{" "}
-                  {progressSummary.totalLessons} complete
+                  {progressSummary.totalLessons} lessons complete
                 </span>
                 <span>
                   {formatMinutes(progressSummary.estimatedRemainingMinutes)} left
@@ -311,22 +323,22 @@ export function CurriculumReader({ book }: { book: Book }) {
               </div>
               <div className="mt-5 border-t border-border/70 pt-4">
                 <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Current lesson</span>
+                  <span>{overviewSectionLabel}</span>
                   <span>{lessonProgress}%</span>
                 </div>
                 <Progress value={lessonProgress} className="h-1.5" />
                 <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">
-                  {activeTopLevelSection?.title}
+                  {overviewSection?.title || activeTopLevelSection?.title}
                 </p>
-                {progressSummary.hasStarted && progressSummary.currentSection ? (
+                {progressSummary.hasStarted && overviewSection ? (
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     className="mt-4 w-full"
-                    onClick={() => scrollToSection(progressSummary.currentSection?.id)}
+                    onClick={() => scrollToSection(overviewSection.id)}
                   >
-                    Continue from last lesson
+                    {overviewActionLabel}
                   </Button>
                 ) : null}
               </div>

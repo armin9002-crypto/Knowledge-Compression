@@ -32,6 +32,17 @@ export function BookCard({ book }: { book: Book }) {
       ? summary.continueHref
       : `/books/${book.slug}`
     : "/library";
+  const lessonLabel = summary.isComplete
+    ? "Completed"
+    : summary.hasStarted
+      ? "Continue"
+      : "Begin";
+  const actionLabel = summary.isComplete
+    ? "Review"
+    : summary.hasStarted
+      ? "Continue"
+      : "Start";
+  const featuredSection = summary.nextSection || summary.currentSection;
 
   return (
     <Link
@@ -70,7 +81,9 @@ export function BookCard({ book }: { book: Book }) {
           <div className="mb-2 flex justify-between text-xs text-muted-foreground">
             <span>
               {isAvailable
-                ? summary.hasStarted
+                ? summary.isComplete
+                  ? `${summary.totalLessons} of ${summary.totalLessons} lessons complete`
+                  : summary.hasStarted
                   ? `${summary.completedCount} of ${summary.totalLessons} lessons complete`
                   : "Ready to begin"
                 : "Planned module"}
@@ -81,25 +94,32 @@ export function BookCard({ book }: { book: Book }) {
           {isAvailable ? (
             <div className="mt-4 rounded-md border border-border/70 bg-background/45 p-3">
               <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                {summary.hasStarted ? "Continue" : "Begin"}
+                {lessonLabel}
               </p>
               <p className="mt-1 line-clamp-1 font-serif text-lg font-semibold">
-                {summary.currentSection?.title || "Start curriculum"}
+                {featuredSection?.title || "Start curriculum"}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span>
-                  {summary.hasStarted
+                  {summary.isComplete
+                    ? "100% complete"
+                    : summary.hasStarted
                     ? `${summary.percentComplete}% complete`
                     : `${summary.totalLessons} lessons`}
                 </span>
                 <span>
-                  {summary.hasStarted
+                  {summary.isComplete
+                    ? "Ready to revisit"
+                    : summary.hasStarted
                     ? `${formatMinutes(
                         summary.estimatedRemainingMinutes
                       )} remaining`
                     : book.completionTime}
                 </span>
               </div>
+              <span className="mt-3 inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors group-hover:bg-primary/90">
+                {actionLabel}
+              </span>
             </div>
           ) : null}
         </div>

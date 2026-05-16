@@ -50,6 +50,12 @@ export function ContinueReadingCard({ books }: { books: Book[] }) {
   if (!continueReading) return null;
 
   const { book, summary } = continueReading;
+  const actionLabel = summary.isComplete ? "Review" : "Continue";
+  const lessonLine = summary.isComplete
+    ? "Completed curriculum"
+    : `Lesson ${summary.currentLessonIndex + 1}: ${
+        summary.currentSection?.title || "Current lesson"
+      }`;
 
   return (
     <div className="mt-8 max-w-2xl rounded-md border border-border bg-card/70 p-4 shadow-panel">
@@ -63,8 +69,7 @@ export function ContinueReadingCard({ books }: { books: Book[] }) {
             {book.title}
           </h2>
           <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
-            Lesson {summary.currentLessonIndex + 1}:{" "}
-            {summary.currentSection?.title}
+            {lessonLine}
           </p>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span>
@@ -80,7 +85,7 @@ export function ContinueReadingCard({ books }: { books: Book[] }) {
         </div>
         <Button asChild className="shrink-0">
           <Link href={summary.continueHref}>
-            Continue
+            {actionLabel}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>

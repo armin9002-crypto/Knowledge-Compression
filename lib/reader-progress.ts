@@ -15,9 +15,11 @@ export type BookProgressSummary = {
   totalLessons: number;
   percentComplete: number;
   currentSection?: CurriculumSection;
+  nextSection?: CurriculumSection;
   currentLessonIndex: number;
   estimatedRemainingMinutes: number;
   hasStarted: boolean;
+  isComplete: boolean;
   continueHref: string;
 };
 
@@ -113,6 +115,16 @@ export function getBookProgressSummary(
         book.sections.findIndex((section) => section.id === currentSection.id)
       )
     : 0;
+  const currentSectionIndex = currentSection
+    ? book.sections.findIndex((section) => section.id === currentSection.id)
+    : -1;
+  const nextSection =
+    currentSection && completed.has(currentSection.id)
+      ? book.sections
+          .slice(Math.max(currentSectionIndex + 1, 0))
+          .find((section) => !completed.has(section.id)) ||
+        book.sections.find((section) => !completed.has(section.id))
+      : currentSection;
   const remainingByLessons = book.sections
     .filter((section) => !completed.has(section.id))
     .reduce((total, section) => total + section.estimatedMinutes, 0);
@@ -131,15 +143,18 @@ export function getBookProgressSummary(
       state.bookmarks.length ||
       state.highlights.length
   );
+  const isComplete = totalLessons > 0 && completedCount === totalLessons;
 
   return {
     completedCount,
     totalLessons,
     percentComplete,
     currentSection,
+    nextSection,
     currentLessonIndex,
     estimatedRemainingMinutes,
     hasStarted,
+    isComplete,
     continueHref: currentSection
       ? `/books/${book.slug}#${currentSection.id}`
       : `/books/${book.slug}`
