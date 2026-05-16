@@ -16,6 +16,7 @@ import { FadeIn, FloatingStack } from "@/components/motion-shell";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { books } from "@/content/books";
+import { getDiscoveryFacets } from "@/lib/book-discovery";
 
 const principles = [
   {
@@ -38,6 +39,9 @@ const principles = [
 export default function Home() {
   const featured = books.filter((book) => book.featured);
   const firstBook = books[0];
+  const browseConcepts = getDiscoveryFacets(books)
+    .filter((facet) => facet.count > 1 || facet.label.includes("/"))
+    .slice(0, 10);
 
   return (
     <>
@@ -141,6 +145,40 @@ export default function Home() {
                   </div>
                 </FadeIn>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-border py-14 md:py-20">
+          <div className="container">
+            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+              <div>
+                <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
+                  Browse by concept
+                </p>
+                <h2 className="mt-4 font-serif text-4xl font-semibold md:text-5xl">
+                  Find the curriculum that fits the question in front of you.
+                </h2>
+                <p className="mt-5 max-w-2xl leading-7 text-muted-foreground">
+                  Explore by domain, mental model, or applied theme. Each path
+                  leads back to serious long-form study rather than scattered
+                  snippets.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {browseConcepts.map((facet) => (
+                  <Link
+                    key={facet.label}
+                    href={`/library?focus=${encodeURIComponent(facet.label)}`}
+                    className="rounded-md border border-border bg-card/60 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-foreground"
+                  >
+                    {facet.label}
+                    <span className="ml-2 text-muted-foreground/70">
+                      {facet.count}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </section>

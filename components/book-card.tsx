@@ -13,9 +13,16 @@ import {
 } from "@/lib/reader-progress";
 import type { Book } from "@/lib/types";
 
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({
+  book,
+  progressSummary
+}: {
+  book: Book;
+  progressSummary?: BookProgressSummary;
+}) {
   const isAvailable = book.sections.length > 0;
   const [summary, setSummary] = useState<BookProgressSummary>(() =>
+    progressSummary ||
     getBookProgressSummary(book, {
       completed: [],
       bookmarks: [],
@@ -24,8 +31,10 @@ export function BookCard({ book }: { book: Book }) {
   );
 
   useEffect(() => {
-    setSummary(getBookProgressSummary(book, readBookProgress(book.slug)));
-  }, [book]);
+    setSummary(
+      progressSummary || getBookProgressSummary(book, readBookProgress(book.slug))
+    );
+  }, [book, progressSummary]);
 
   const href = isAvailable
     ? summary.hasStarted
@@ -65,9 +74,19 @@ export function BookCard({ book }: { book: Book }) {
             <ArrowUpRight className="h-4 w-4" />
           </span>
         </div>
-        <p className="mt-4 min-h-12 text-sm leading-6 text-muted-foreground">
+        <p className="mt-4 line-clamp-3 min-h-12 text-sm leading-6 text-muted-foreground">
           {book.description}
         </p>
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {book.primaryThemes.slice(0, 4).map((theme) => (
+            <span
+              key={theme}
+              className="rounded-md border border-border/70 bg-background/45 px-2 py-1 text-xs text-muted-foreground"
+            >
+              {theme}
+            </span>
+          ))}
+        </div>
         <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
           <span>
             {book.category} / {book.difficulty}
