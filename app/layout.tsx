@@ -28,7 +28,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" data-theme="dark" suppressHydrationWarning>
+    <html
+      lang="en"
+      className="dark"
+      data-theme="dark"
+      data-reading-size="medium"
+      suppressHydrationWarning
+    >
       <head>
         <Script id="theme-bootstrap" strategy="beforeInteractive">
           {`
@@ -36,11 +42,15 @@ export default function RootLayout({
               try {
                 var stored = window.localStorage.getItem("kc-theme");
                 var theme = stored === "light" || stored === "sepia" || stored === "dark" ? stored : "dark";
+                var storedReadingSize = window.localStorage.getItem("kc-reading-size");
+                var readingSize = storedReadingSize === "small" || storedReadingSize === "medium" || storedReadingSize === "large" ? storedReadingSize : "medium";
                 var root = document.documentElement;
                 root.dataset.theme = theme;
+                root.dataset.readingSize = readingSize;
                 root.classList.toggle("dark", theme === "dark");
               } catch (error) {
                 document.documentElement.dataset.theme = "dark";
+                document.documentElement.dataset.readingSize = "medium";
                 document.documentElement.classList.add("dark");
               }
             })();

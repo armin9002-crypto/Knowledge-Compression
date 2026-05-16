@@ -5,6 +5,14 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --reader-font-size: clamp(1.035rem, 0.99rem + 0.16vw, 1.13rem);
+    --reader-line-height: 1.72;
+    --reader-paragraph-space: 1.25rem;
+    --reader-lead-size: clamp(1.12rem, 1.04rem + 0.24vw, 1.24rem);
+    --reader-lead-line-height: 1.76;
+    --reader-summary-size: clamp(1.18rem, 1.05rem + 0.45vw, 1.48rem);
+    --reader-feature-size: clamp(1.28rem, 1.14rem + 0.42vw, 1.55rem);
+    --reader-support-size: 0.95rem;
     --background: 213 22% 7%;
     --foreground: 42 23% 93%;
     --card: 213 21% 10%;
@@ -20,6 +28,28 @@
     --border: 213 15% 20%;
     --input: 213 15% 20%;
     --ring: 176 32% 44%;
+  }
+
+  [data-reading-size="small"] {
+    --reader-font-size: clamp(0.99rem, 0.96rem + 0.12vw, 1.06rem);
+    --reader-line-height: 1.68;
+    --reader-paragraph-space: 1.125rem;
+    --reader-lead-size: clamp(1.065rem, 1rem + 0.18vw, 1.16rem);
+    --reader-lead-line-height: 1.72;
+    --reader-summary-size: clamp(1.12rem, 1.02rem + 0.34vw, 1.35rem);
+    --reader-feature-size: clamp(1.2rem, 1.08rem + 0.32vw, 1.42rem);
+    --reader-support-size: 0.91rem;
+  }
+
+  [data-reading-size="large"] {
+    --reader-font-size: clamp(1.09rem, 1.03rem + 0.2vw, 1.22rem);
+    --reader-line-height: 1.76;
+    --reader-paragraph-space: 1.4rem;
+    --reader-lead-size: clamp(1.18rem, 1.08rem + 0.3vw, 1.34rem);
+    --reader-lead-line-height: 1.8;
+    --reader-summary-size: clamp(1.25rem, 1.09rem + 0.55vw, 1.58rem);
+    --reader-feature-size: clamp(1.36rem, 1.18rem + 0.5vw, 1.68rem);
+    --reader-support-size: 1rem;
   }
 
   [data-theme="light"] {
@@ -104,15 +134,20 @@
 
 @layer components {
   .editorial-prose {
-    @apply font-serif text-[clamp(1.035rem,0.99rem+0.16vw,1.13rem)] leading-[1.72] text-foreground/90 md:leading-[1.78];
+    @apply font-serif text-foreground/90;
+    font-size: var(--reader-font-size);
+    line-height: var(--reader-line-height);
   }
 
   .editorial-prose p {
-    @apply my-5 md:my-6;
+    margin-bottom: var(--reader-paragraph-space);
+    margin-top: var(--reader-paragraph-space);
   }
 
   .editorial-prose > p:first-child {
-    @apply mt-7 text-[clamp(1.12rem,1.04rem+0.24vw,1.24rem)] leading-[1.76] text-foreground md:mt-8 md:leading-[1.8];
+    @apply mt-7 text-foreground md:mt-8;
+    font-size: var(--reader-lead-size);
+    line-height: var(--reader-lead-line-height);
   }
 
   .editorial-prose h3 {
@@ -121,6 +156,18 @@
 
   .editorial-prose strong {
     @apply font-semibold text-foreground;
+  }
+
+  .reader-summary-text {
+    font-size: var(--reader-summary-size);
+  }
+
+  .reader-feature-text {
+    font-size: var(--reader-feature-size);
+  }
+
+  .reader-support-text {
+    font-size: var(--reader-support-size);
   }
 
   .glass-panel {

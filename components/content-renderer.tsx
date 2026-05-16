@@ -36,7 +36,9 @@ function NumberedCards({
             <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-background font-sans text-xs text-muted-foreground">
               {ordered ? index + 1 : <Check className="h-3.5 w-3.5" />}
             </span>
-            <span className="font-sans text-[0.95rem] leading-6">{item}</span>
+            <span className="reader-support-text font-sans leading-6">
+              {item}
+            </span>
           </div>
         ))}
       </div>
@@ -100,7 +102,7 @@ export function ContentRenderer({
                 <Icon className="h-4 w-4" />
                 {block.title}
               </div>
-              <p className="mb-0 mt-3 font-serif text-[clamp(1.28rem,1.14rem+0.42vw,1.55rem)] leading-[1.38] text-foreground">
+              <p className="reader-feature-text mb-0 mt-3 font-serif leading-[1.38] text-foreground">
                 {block.text}
               </p>
             </aside>
@@ -157,7 +159,7 @@ export function ContentRenderer({
               </h3>
               <p className="mb-0 mt-3">{block.body}</p>
               {block.whyItMatters ? (
-                <p className="mb-0 mt-4 border-l border-accent pl-4 font-sans text-[0.95rem] leading-6 text-muted-foreground">
+                <p className="reader-support-text mb-0 mt-4 border-l border-accent pl-4 font-sans leading-6 text-muted-foreground">
                   {block.whyItMatters}
                 </p>
               ) : null}
@@ -193,7 +195,7 @@ export function ContentRenderer({
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     Default approach
                   </p>
-                  <p className="mb-0 mt-2 font-sans text-[0.95rem] leading-6">
+                  <p className="reader-support-text mb-0 mt-2 font-sans leading-6">
                     {block.defaultApproach}
                   </p>
                 </div>
@@ -201,12 +203,12 @@ export function ContentRenderer({
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-accent-foreground/80">
                     Better approach
                   </p>
-                  <p className="mb-0 mt-2 font-sans text-[0.95rem] leading-6">
+                  <p className="reader-support-text mb-0 mt-2 font-sans leading-6">
                     {block.betterApproach}
                   </p>
                 </div>
               </div>
-              <p className="mb-0 mt-4 font-sans text-[0.95rem] leading-6 text-muted-foreground">
+              <p className="reader-support-text mb-0 mt-4 font-sans leading-6 text-muted-foreground">
                 {block.whyItWorks}
               </p>
             </div>
@@ -224,7 +226,7 @@ export function ContentRenderer({
                 {block.context}
               </h3>
               <NumberedCards items={block.steps} ordered />
-              <p className="mb-0 mt-4 rounded-md border border-accent/30 bg-accent/10 p-4 font-sans text-[0.95rem] leading-6">
+              <p className="reader-support-text mb-0 mt-4 rounded-md border border-accent/30 bg-accent/10 p-4 font-sans leading-6">
                 {block.result}
               </p>
             </div>
@@ -243,13 +245,13 @@ export function ContentRenderer({
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     Not
                   </p>
-                  <p className="mb-0 mt-2 font-sans text-[0.95rem] leading-6">{block.not}</p>
+                  <p className="reader-support-text mb-0 mt-2 font-sans leading-6">{block.not}</p>
                 </div>
                 <div className="rounded-md border border-accent/40 bg-accent/10 p-4">
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-accent-foreground/80">
                     But
                   </p>
-                  <p className="mb-0 mt-2 font-sans text-[0.95rem] leading-6">{block.but}</p>
+                  <p className="reader-support-text mb-0 mt-2 font-sans leading-6">{block.but}</p>
                 </div>
               </div>
             </div>
@@ -265,10 +267,10 @@ export function ContentRenderer({
               <p className="mb-0 mt-3 font-serif text-xl leading-7 text-foreground md:text-2xl md:leading-8">
                 {block.misconception}
               </p>
-              <p className="mb-0 mt-4 rounded-md border border-accent/30 bg-accent/10 p-4 font-sans text-[0.95rem] leading-6">
+              <p className="reader-support-text mb-0 mt-4 rounded-md border border-accent/30 bg-accent/10 p-4 font-sans leading-6">
                 {block.correction}
               </p>
-              <p className="mb-0 mt-3 font-sans text-[0.95rem] leading-6 text-muted-foreground">
+              <p className="reader-support-text mb-0 mt-3 font-sans leading-6 text-muted-foreground">
                 {block.whyItMatters}
               </p>
             </div>
@@ -286,7 +288,7 @@ export function ContentRenderer({
                 {block.name}
               </h3>
               <p className="mb-0 mt-3">{block.explanation}</p>
-              <p className="mb-0 mt-4 font-sans text-[0.95rem] leading-6 text-muted-foreground">
+              <p className="reader-support-text mb-0 mt-4 font-sans leading-6 text-muted-foreground">
                 <span className="font-medium text-foreground">Use when: </span>
                 {block.useWhen}
               </p>
@@ -306,7 +308,7 @@ export function ContentRenderer({
                     <span className="text-xs text-muted-foreground">
                       {String(stepIndex + 1).padStart(2, "0")}
                     </span>
-                    <p className="my-0 mt-2 font-sans text-[0.95rem] font-medium leading-6">
+                    <p className="reader-support-text my-0 mt-2 font-sans font-medium leading-6">
                       {step}
                     </p>
                   </div>
@@ -384,7 +386,7 @@ export function ContentRenderer({
                 <Sparkles className="h-4 w-4" />
                 {block.title}
               </div>
-              <p className="mb-0 mt-3 font-serif text-[clamp(1.28rem,1.14rem+0.42vw,1.55rem)] leading-[1.38] text-foreground">
+              <p className="reader-feature-text mb-0 mt-3 font-serif leading-[1.38] text-foreground">
                 {block.anchor}
               </p>
             </div>

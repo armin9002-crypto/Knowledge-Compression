@@ -14,6 +14,7 @@ import {
   Target
 } from "lucide-react";
 import { ContentRenderer } from "@/components/content-renderer";
+import { FontSizeToggle } from "@/components/font-size-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -126,7 +127,7 @@ export function CurriculumReader({ book }: { book: Book }) {
   return (
     <main className="min-h-screen bg-background">
       <div className="border-b border-border bg-card/40">
-        <div className="container py-7">
+        <div className="mx-auto w-full max-w-[1500px] px-5 py-7 sm:px-6 lg:px-8">
           <div className="mb-4 flex items-center justify-between gap-3">
             <Button asChild variant="ghost" size="sm" className="-ml-3">
               <Link href="/library">
@@ -134,7 +135,10 @@ export function CurriculumReader({ book }: { book: Book }) {
                 Library
               </Link>
             </Button>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <FontSizeToggle />
+              <ThemeToggle />
+            </div>
           </div>
           <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-end xl:grid-cols-[1fr_320px]">
             <div>
@@ -225,7 +229,7 @@ export function CurriculumReader({ book }: { book: Book }) {
         </div>
       </div>
 
-      <div className="container grid gap-8 py-8 lg:grid-cols-[250px_minmax(0,780px)] lg:gap-12 lg:py-14 xl:grid-cols-[250px_minmax(0,780px)_180px] xl:gap-14">
+      <div className="mx-auto grid w-full max-w-[1500px] gap-8 px-5 py-8 sm:px-6 lg:grid-cols-[250px_minmax(0,780px)] lg:justify-center lg:gap-10 lg:px-8 lg:py-14 xl:grid-cols-[250px_minmax(0,780px)_180px] xl:gap-12 2xl:max-w-[1600px]">
         <aside
           className={cn(
             "lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto lg:pr-1",
@@ -335,7 +339,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                     <h2 className="max-w-3xl font-serif text-[clamp(2.15rem,1.62rem+1.7vw,3.55rem)] font-semibold leading-[1.04] tracking-normal">
                       {section.title}
                     </h2>
-                    <p className="mt-5 max-w-3xl font-serif text-[clamp(1.18rem,1.05rem+0.45vw,1.48rem)] leading-[1.55] text-muted-foreground">
+                    <p className="reader-summary-text mt-5 max-w-3xl font-serif leading-[1.55] text-muted-foreground">
                       {section.summary}
                     </p>
                   </div>

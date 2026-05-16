@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen, Library, Sparkles } from "lucide-react";
+import { FontSizeToggle } from "@/components/font-size-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
@@ -27,7 +28,9 @@ export function SiteHeader() {
           </Link>
         </nav>
         <div className="flex shrink-0 items-center gap-2">
+          <FontSizeToggle compact className="sm:hidden" />
           <ThemeToggle compact className="sm:hidden" />
+          <FontSizeToggle className="hidden sm:inline-flex" />
           <ThemeToggle className="hidden sm:inline-flex" />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link href="/library">
