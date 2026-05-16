@@ -18,39 +18,72 @@ import { FontSizeToggle } from "@/components/font-size-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import {
+  emptyReaderState,
+  formatMinutes,
+  getBookProgressSummary,
+  readBookProgress,
+  writeBookProgress,
+  writeLastOpenedBookSlug,
+  type StoredReaderState
+} from "@/lib/reader-progress";
 import type { Book } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type ReaderState = {
-  completed: string[];
-  bookmarks: string[];
-  highlights: string[];
-};
-
-const emptyState: ReaderState = {
-  completed: [],
-  bookmarks: [],
-  highlights: []
-};
-
 export function CurriculumReader({ book }: { book: Book }) {
-  const storageKey = `curriculum:${book.slug}`;
-  const [readerState, setReaderState] = useState<ReaderState>(emptyState);
+  const [readerState, setReaderState] = useState<StoredReaderState>(() =>
+    emptyReaderState()
+  );
+  const [hydrated, setHydrated] = useState(false);
+  const [restoredPosition, setRestoredPosition] = useState(false);
   const [activeSection, setActiveSection] = useState(book.sections[0]?.id);
   const [lessonProgress, setLessonProgress] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey);
-    if (stored) {
-      setReaderState(JSON.parse(stored) as ReaderState);
+    const stored = readBookProgress(book.slug);
+    const hashSection = window.location.hash.replace("#", "");
+    const startingSection =
+      book.sections.find((section) => section.id === hashSection)?.id ||
+      book.sections.find((section) => section.id === stored.lastActiveSection)
+        ?.id ||
+      book.sections[0]?.id;
+
+    setReaderState(stored);
+    if (startingSection) {
+      setActiveSection(startingSection);
     }
-  }, [storageKey]);
+    writeLastOpenedBookSlug(book.slug);
+    setHydrated(true);
+  }, [book.sections, book.slug]);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify(readerState));
-  }, [readerState, storageKey]);
+    if (!hydrated) return;
+    writeBookProgress(book.slug, readerState);
+  }, [book.slug, hydrated, readerState]);
+
+  useEffect(() => {
+    if (!hydrated || restoredPosition) return;
+    if (window.location.hash) {
+      setRestoredPosition(true);
+      return;
+    }
+    const sectionId = readerState.lastActiveSection;
+    if (!sectionId || sectionId === book.sections[0]?.id) {
+      setRestoredPosition(true);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({
+        block: "start"
+      });
+      setRestoredPosition(true);
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [book.sections, hydrated, readerState.lastActiveSection, restoredPosition]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -77,10 +110,12 @@ export function CurriculumReader({ book }: { book: Book }) {
     return () => observer.disconnect();
   }, [book.sections]);
 
-  const progress = useMemo(() => {
-    if (!book.sections.length) return 0;
-    return Math.round((readerState.completed.length / book.sections.length) * 100);
-  }, [book.sections.length, readerState.completed.length]);
+  const progressSummary = useMemo(
+    () => getBookProgressSummary(book, readerState),
+    [book, readerState]
+  );
+
+  const progress = progressSummary.percentComplete;
 
   const activeTopLevelSection = useMemo(() => {
     return (
@@ -134,14 +169,59 @@ export function CurriculumReader({ book }: { book: Book }) {
     };
   }, []);
 
-  const toggle = (key: keyof ReaderState, id: string) => {
+  useEffect(() => {
+    if (!hydrated || !activeTopLevelSection) return;
+    setReaderState((current) => {
+      if (current.lastActiveSection === activeTopLevelSection.id) {
+        return current;
+      }
+      return {
+        ...current,
+        lastActiveSection: activeTopLevelSection.id,
+        lastVisitedAt: Date.now()
+      };
+    });
+  }, [activeTopLevelSection, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    setReaderState((current) => {
+      if (
+        current.readingProgress === readingProgress &&
+        current.lastScrollY === window.scrollY
+      ) {
+        return current;
+      }
+      return {
+        ...current,
+        readingProgress,
+        lastScrollY: window.scrollY,
+        lastVisitedAt: Date.now()
+      };
+    });
+  }, [hydrated, readingProgress]);
+
+  const scrollToSection = (sectionId?: string) => {
+    if (!sectionId) return;
+    document.getElementById(sectionId)?.scrollIntoView({
+      block: "start",
+      behavior: "smooth"
+    });
+  };
+
+  const toggle = (
+    key: "completed" | "bookmarks" | "highlights",
+    id: string
+  ) => {
     setReaderState((current) => {
       const exists = current[key].includes(id);
       return {
         ...current,
         [key]: exists
           ? current[key].filter((item) => item !== id)
-          : [...current[key], id]
+          : [...current[key], id],
+        lastActiveSection: activeTopLevelSection?.id || id,
+        lastVisitedAt: Date.now()
       };
     });
   };
@@ -150,12 +230,15 @@ export function CurriculumReader({ book }: { book: Book }) {
     <main className="min-h-screen bg-background">
       <div className="sticky top-0 z-40 border-b border-border/70 bg-background/84 backdrop-blur-xl">
         <div className="mx-auto flex h-[3.25rem] w-full max-w-[1500px] items-center justify-between gap-3 px-5 sm:px-6 lg:h-12 lg:px-8">
-          <div className="min-w-0 sm:max-w-[42%]">
+          <div className="min-w-0 flex-1 sm:max-w-[42%]">
             <p className="hidden text-xs uppercase tracking-[0.18em] text-muted-foreground sm:block">
               Reading
             </p>
             <p className="truncate font-serif text-base font-semibold leading-5 text-foreground sm:hidden">
               {book.title}
+            </p>
+            <p className="truncate text-[0.7rem] leading-4 text-muted-foreground sm:hidden">
+              {activeTopLevelSection?.title}
             </p>
             <p className="hidden truncate text-xs leading-5 text-muted-foreground sm:block">
               {activeTopLevelSection?.title}
@@ -212,13 +295,18 @@ export function CurriculumReader({ book }: { book: Book }) {
             </div>
             <div className="rounded-md border border-border bg-background/55 p-4">
               <div className="mb-3 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Reading progress</span>
+                <span className="text-muted-foreground">Curriculum progress</span>
                 <span className="font-medium">{progress}%</span>
               </div>
               <Progress value={progress} />
               <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs text-muted-foreground">
-                <span>{book.sections.length} lessons</span>
-                <span>{book.readingEstimateMinutes} min</span>
+                <span>
+                  {progressSummary.completedCount} of{" "}
+                  {progressSummary.totalLessons} complete
+                </span>
+                <span>
+                  {formatMinutes(progressSummary.estimatedRemainingMinutes)} left
+                </span>
                 <span>{readerState.bookmarks.length} saved</span>
               </div>
               <div className="mt-5 border-t border-border/70 pt-4">
@@ -230,6 +318,17 @@ export function CurriculumReader({ book }: { book: Book }) {
                 <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">
                   {activeTopLevelSection?.title}
                 </p>
+                {progressSummary.hasStarted && progressSummary.currentSection ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={() => scrollToSection(progressSummary.currentSection?.id)}
+                  >
+                    Continue from last lesson
+                  </Button>
+                ) : null}
               </div>
             </div>
           </div>
@@ -564,7 +663,7 @@ export function CurriculumReader({ book }: { book: Book }) {
 
         <aside className="hidden xl:block">
           <div className="sticky top-24 rounded-md border border-border bg-card/50 p-4">
-            <p className="text-sm font-medium">Study State</p>
+            <p className="text-sm font-medium">Reading State</p>
             <div className="mt-4 space-y-4 text-sm text-muted-foreground">
               <div className="flex justify-between">
                 <span>Completed</span>
@@ -584,8 +683,8 @@ export function CurriculumReader({ book }: { book: Book }) {
               </div>
             </div>
             <p className="mt-5 text-xs leading-5 text-muted-foreground">
-              Saved locally for now. The data model is ready for account-level
-              sync, AI recall prompts, and spaced review.
+              Saved locally on this device so the library can remember where
+              you left off.
             </p>
           </div>
         </aside>

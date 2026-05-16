@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { BookCard } from "@/components/book-card";
 import { BookCover } from "@/components/book-cover";
+import { ContinueReadingCard } from "@/components/continue-reading-card";
 import { FadeIn, FloatingStack } from "@/components/motion-shell";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ export default function Home() {
                     </Link>
                   </Button>
                 </div>
+                <ContinueReadingCard books={books} />
               </div>
             </FadeIn>
 
@@ -161,7 +163,7 @@ export default function Home() {
                 {[
                   "Optimized reading width and dark-mode contrast",
                   "Section-level progress and learning state",
-                  "Expandable content model for future AI recall and tutoring"
+                  "Local resume state for returning to the right lesson"
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-3 text-sm">
                     <Check className="h-4 w-4 text-accent-foreground" />

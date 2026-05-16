@@ -1,15 +1,41 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 import { BookCover } from "@/components/book-cover";
 import { Progress } from "@/components/ui/progress";
+import {
+  formatMinutes,
+  getBookProgressSummary,
+  readBookProgress,
+  type BookProgressSummary
+} from "@/lib/reader-progress";
 import type { Book } from "@/lib/types";
 
 export function BookCard({ book }: { book: Book }) {
   const isAvailable = book.sections.length > 0;
+  const [summary, setSummary] = useState<BookProgressSummary>(() =>
+    getBookProgressSummary(book, {
+      completed: [],
+      bookmarks: [],
+      highlights: []
+    })
+  );
+
+  useEffect(() => {
+    setSummary(getBookProgressSummary(book, readBookProgress(book.slug)));
+  }, [book]);
+
+  const href = isAvailable
+    ? summary.hasStarted
+      ? summary.continueHref
+      : `/books/${book.slug}`
+    : "/library";
 
   return (
     <Link
-      href={isAvailable ? `/books/${book.slug}` : "/library"}
+      href={href}
       className="group block rounded-md border border-border/70 bg-card/60 p-3 transition duration-300 hover:-translate-y-1 hover:border-accent/70 hover:bg-card hover:shadow-glow"
     >
       <BookCover
@@ -42,10 +68,40 @@ export function BookCard({ book }: { book: Book }) {
         </div>
         <div className="mt-4">
           <div className="mb-2 flex justify-between text-xs text-muted-foreground">
-            <span>{isAvailable ? "Curriculum progress" : "Planned module"}</span>
-            <span>{book.progress}%</span>
+            <span>
+              {isAvailable
+                ? summary.hasStarted
+                  ? `${summary.completedCount} of ${summary.totalLessons} lessons complete`
+                  : "Ready to begin"
+                : "Planned module"}
+            </span>
+            <span>{summary.percentComplete}%</span>
           </div>
-          <Progress value={book.progress} />
+          <Progress value={summary.percentComplete} />
+          {isAvailable ? (
+            <div className="mt-4 rounded-md border border-border/70 bg-background/45 p-3">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                {summary.hasStarted ? "Continue" : "Begin"}
+              </p>
+              <p className="mt-1 line-clamp-1 font-serif text-lg font-semibold">
+                {summary.currentSection?.title || "Start curriculum"}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span>
+                  {summary.hasStarted
+                    ? `${summary.percentComplete}% complete`
+                    : `${summary.totalLessons} lessons`}
+                </span>
+                <span>
+                  {summary.hasStarted
+                    ? `${formatMinutes(
+                        summary.estimatedRemainingMinutes
+                      )} remaining`
+                    : book.completionTime}
+                </span>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </Link>
