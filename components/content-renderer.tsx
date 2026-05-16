@@ -37,12 +37,12 @@ function ReflectionField({
   }, [storageId, value]);
 
   return (
-    <div className="my-8 rounded-md border border-border bg-card/70 p-5">
+    <div className="my-10 rounded-md border border-border bg-card/55 p-5 md:p-6">
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
         <MessageSquareText className="h-4 w-4" />
         Reflection
       </div>
-      <p className="mb-0 mt-4 font-serif text-2xl leading-8 text-foreground">
+      <p className="mb-0 mt-4 font-serif text-2xl leading-8 text-foreground md:text-[1.7rem] md:leading-9">
         {question}
       </p>
       {helperText ? (
@@ -54,7 +54,7 @@ function ReflectionField({
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder="Write a private study note..."
-        className="mt-5 min-h-28 w-full resize-y rounded-md border border-border bg-background/70 p-4 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-accent"
+        className="mt-5 min-h-32 w-full resize-y rounded-md border border-border bg-background/70 p-4 font-sans text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-accent"
       />
     </div>
   );
@@ -70,7 +70,7 @@ function NumberedCards({
   ordered?: boolean;
 }) {
   return (
-    <div className="my-7 rounded-md border border-border bg-secondary/20 p-5">
+    <div className="my-8 rounded-md border border-border/80 bg-secondary/15 p-5">
       {title ? (
         <p className="my-0 mb-4 text-sm font-medium text-muted-foreground">
           {title}
@@ -79,7 +79,7 @@ function NumberedCards({
       <div className="space-y-3">
         {items.map((item, index) => (
           <div key={item} className="flex gap-3">
-            <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-background text-xs text-muted-foreground">
+            <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-background font-sans text-xs text-muted-foreground">
               {ordered ? index + 1 : <Check className="h-3.5 w-3.5" />}
             </span>
             <span>{item}</span>
@@ -108,13 +108,13 @@ export function ContentRenderer({
 
         if (block.type === "heading") {
           return (
-            <div key={key} className="mb-4 mt-10">
+            <div key={key} className="mb-4 mt-12 border-t border-border/70 pt-8">
               {block.eyebrow ? (
                 <p className="my-0 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   {block.eyebrow}
                 </p>
               ) : null}
-              <h3 className="mt-2 font-serif text-3xl font-semibold">
+              <h3 className="mt-2 font-serif text-3xl font-semibold md:text-4xl">
                 {block.title}
               </h3>
             </div>
@@ -137,17 +137,17 @@ export function ContentRenderer({
             <aside
               key={key}
               className={cn(
-                "my-8 rounded-md border p-5",
+                "my-10 rounded-md border-l-2 border-r-0 border-t-0 border-b-0 p-5",
                 block.type === "warning"
-                  ? "border-amber-400/30 bg-amber-400/10"
-                  : "border-accent/40 bg-accent/10"
+                  ? "border-amber-400/50 bg-amber-400/5"
+                  : "border-accent/60 bg-accent/10"
               )}
             >
               <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-accent-foreground/80">
                 <Icon className="h-4 w-4" />
                 {block.title}
               </div>
-              <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground">
+              <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground md:text-[1.7rem] md:leading-9">
                 {block.text}
               </p>
             </aside>
@@ -169,7 +169,7 @@ export function ContentRenderer({
           return (
             <div
               key={key}
-              className="my-7 rounded-md border border-border bg-card/65 p-5"
+              className="my-8 rounded-md border border-border/80 bg-card/45 p-5"
             >
               {block.title ? (
                 <div className="mb-4 flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -179,7 +179,7 @@ export function ContentRenderer({
               ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 {block.items.map((item) => (
-                  <div key={item} className="flex gap-3 rounded-md border border-border/70 bg-background/50 p-3 text-sm leading-6">
+                  <div key={item} className="flex gap-3 rounded-md border border-border/70 bg-background/45 p-3 font-sans text-sm leading-6">
                     <Check className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
                     <span>{item}</span>
                   </div>
@@ -193,18 +193,18 @@ export function ContentRenderer({
           return (
             <div
               key={key}
-              className="my-8 rounded-md border border-border bg-card/75 p-5"
+              className="my-10 rounded-md border border-border/80 bg-card/50 p-5 md:p-6"
             >
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Brain className="h-4 w-4" />
                 Concept
               </div>
-              <h3 className="mb-0 mt-4 font-serif text-3xl font-semibold">
+              <h3 className="mb-0 mt-4 font-serif text-3xl font-semibold md:text-4xl">
                 {block.title}
               </h3>
               <p className="mb-0 mt-3">{block.body}</p>
               {block.whyItMatters ? (
-                <p className="mb-0 mt-4 border-l border-accent pl-4 text-base leading-7 text-muted-foreground">
+                <p className="mb-0 mt-4 border-l border-accent pl-4 font-sans text-base leading-7 text-muted-foreground">
                   {block.whyItMatters}
                 </p>
               ) : null}
@@ -214,7 +214,7 @@ export function ContentRenderer({
 
         if (block.type === "example") {
           return (
-            <div key={key} className="my-7 rounded-md border border-border bg-secondary/20 p-5">
+            <div key={key} className="my-8 rounded-md border border-border/80 bg-secondary/15 p-5">
               <p className="my-0 text-sm font-medium text-muted-foreground">
                 Example
               </p>
@@ -228,7 +228,7 @@ export function ContentRenderer({
 
         if (block.type === "expandedExample") {
           return (
-            <div key={key} className="my-9 rounded-md border border-border bg-card/65 p-5">
+            <div key={key} className="my-11 rounded-md border border-border/80 bg-card/45 p-5 md:p-6">
               <p className="my-0 text-sm font-medium text-muted-foreground">
                 Expanded example
               </p>
@@ -240,7 +240,7 @@ export function ContentRenderer({
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     Default approach
                   </p>
-                  <p className="mb-0 mt-2 text-base leading-7">
+                  <p className="mb-0 mt-2 font-sans text-base leading-7">
                     {block.defaultApproach}
                   </p>
                 </div>
@@ -248,12 +248,12 @@ export function ContentRenderer({
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-accent-foreground/80">
                     Better approach
                   </p>
-                  <p className="mb-0 mt-2 text-base leading-7">
+                  <p className="mb-0 mt-2 font-sans text-base leading-7">
                     {block.betterApproach}
                   </p>
                 </div>
               </div>
-              <p className="mb-0 mt-4 text-base leading-7 text-muted-foreground">
+              <p className="mb-0 mt-4 font-sans text-base leading-7 text-muted-foreground">
                 {block.whyItWorks}
               </p>
             </div>
@@ -262,7 +262,7 @@ export function ContentRenderer({
 
         if (block.type === "application") {
           return (
-            <div key={key} className="my-9 rounded-md border border-border bg-secondary/25 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-secondary/15 p-5 md:p-6">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Target className="h-4 w-4" />
                 Application
@@ -271,7 +271,7 @@ export function ContentRenderer({
                 {block.context}
               </h3>
               <NumberedCards items={block.steps} ordered />
-              <p className="mb-0 mt-4 rounded-md border border-accent/35 bg-accent/10 p-4 text-base leading-7">
+              <p className="mb-0 mt-4 rounded-md border border-accent/30 bg-accent/10 p-4 font-sans text-base leading-7">
                 {block.result}
               </p>
             </div>
@@ -280,7 +280,7 @@ export function ContentRenderer({
 
         if (block.type === "exercise") {
           return (
-            <div key={key} className="my-9 rounded-md border border-border bg-card/70 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-card/50 p-5 md:p-6">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <PenLine className="h-4 w-4" />
                 Exercise
@@ -310,7 +310,7 @@ export function ContentRenderer({
 
         if (block.type === "keyDistinction") {
           return (
-            <div key={key} className="my-8 rounded-md border border-border bg-card/65 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-card/45 p-5 md:p-6">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <GitCompare className="h-4 w-4" />
                 {block.title}
@@ -320,13 +320,13 @@ export function ContentRenderer({
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     Not
                   </p>
-                  <p className="mb-0 mt-2 text-base leading-7">{block.not}</p>
+                  <p className="mb-0 mt-2 font-sans text-base leading-7">{block.not}</p>
                 </div>
                 <div className="rounded-md border border-accent/40 bg-accent/10 p-4">
                   <p className="my-0 text-xs uppercase tracking-[0.16em] text-accent-foreground/80">
                     But
                   </p>
-                  <p className="mb-0 mt-2 text-base leading-7">{block.but}</p>
+                  <p className="mb-0 mt-2 font-sans text-base leading-7">{block.but}</p>
                 </div>
               </div>
             </div>
@@ -335,17 +335,17 @@ export function ContentRenderer({
 
         if (block.type === "misconception") {
           return (
-            <div key={key} className="my-8 rounded-md border border-border bg-card/70 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-card/50 p-5 md:p-6">
               <p className="my-0 text-sm font-medium text-muted-foreground">
                 Misconception
               </p>
               <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground">
                 {block.misconception}
               </p>
-              <p className="mb-0 mt-4 rounded-md border border-accent/35 bg-accent/10 p-4 text-base leading-7">
+              <p className="mb-0 mt-4 rounded-md border border-accent/30 bg-accent/10 p-4 font-sans text-base leading-7">
                 {block.correction}
               </p>
-              <p className="mb-0 mt-3 text-base leading-7 text-muted-foreground">
+              <p className="mb-0 mt-3 font-sans text-base leading-7 text-muted-foreground">
                 {block.whyItMatters}
               </p>
             </div>
@@ -354,7 +354,7 @@ export function ContentRenderer({
 
         if (block.type === "mentalModel") {
           return (
-            <div key={key} className="my-8 rounded-md border border-border bg-secondary/25 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-secondary/15 p-5 md:p-6">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Workflow className="h-4 w-4" />
                 Mental model
@@ -363,7 +363,7 @@ export function ContentRenderer({
                 {block.name}
               </h3>
               <p className="mb-0 mt-3">{block.explanation}</p>
-              <p className="mb-0 mt-4 text-base leading-7 text-muted-foreground">
+              <p className="mb-0 mt-4 font-sans text-base leading-7 text-muted-foreground">
                 <span className="font-medium text-foreground">Use when: </span>
                 {block.useWhen}
               </p>
@@ -373,7 +373,7 @@ export function ContentRenderer({
 
         if (block.type === "diagram") {
           return (
-            <div key={key} className="my-9 rounded-md border border-border bg-secondary/30 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-secondary/15 p-5">
               <p className="my-0 text-sm font-medium text-muted-foreground">
                 {block.title}
               </p>
@@ -383,7 +383,7 @@ export function ContentRenderer({
                     <span className="text-xs text-muted-foreground">
                       {String(stepIndex + 1).padStart(2, "0")}
                     </span>
-                    <p className="my-0 mt-2 text-base font-medium leading-6">
+                    <p className="my-0 mt-2 font-sans text-base font-medium leading-6">
                       {step}
                     </p>
                   </div>
@@ -395,17 +395,17 @@ export function ContentRenderer({
 
         if (block.type === "framework") {
           return (
-            <div key={key} className="my-9 rounded-md border border-border bg-card/65 p-5">
+            <div key={key} className="my-10 rounded-md border border-border/80 bg-card/45 p-5 md:p-6">
               <p className="my-0 text-sm font-medium text-muted-foreground">
                 {block.title}
               </p>
               <div className="mt-5 space-y-3">
                 {block.stages.map((stage, stageIndex) => (
                   <div key={`${stage.name}-${stageIndex}`} className="grid gap-2 rounded-md border border-border/70 bg-background/55 p-4 sm:grid-cols-[120px_1fr]">
-                    <p className="my-0 text-sm font-medium text-foreground">
+                    <p className="my-0 font-sans text-sm font-medium text-foreground">
                       {stage.name}
                     </p>
-                    <p className="my-0 text-sm leading-6 text-muted-foreground">
+                    <p className="my-0 font-sans text-sm leading-6 text-muted-foreground">
                       {stage.description}
                     </p>
                   </div>
@@ -417,14 +417,14 @@ export function ContentRenderer({
 
         if (block.type === "comparisonTable") {
           return (
-            <div key={key} className="my-9 overflow-hidden rounded-md border border-border bg-card/65">
+            <div key={key} className="my-10 overflow-hidden rounded-md border border-border/80 bg-card/45">
               <div className="border-b border-border p-4">
                 <p className="my-0 text-sm font-medium text-muted-foreground">
                   {block.title}
                 </p>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] text-left text-sm">
+                <table className="w-full min-w-[520px] text-left font-sans text-sm">
                   <thead className="bg-secondary/40 text-muted-foreground">
                     <tr>
                       {block.columns.map((column) => (
@@ -455,13 +455,13 @@ export function ContentRenderer({
           return (
             <div
               key={key}
-              className="my-8 rounded-md border border-accent/40 bg-accent/10 p-5"
+              className="my-10 rounded-md border-l-2 border-r-0 border-t-0 border-b-0 border-accent/60 bg-accent/10 p-5"
             >
               <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-accent-foreground/80">
                 <Sparkles className="h-4 w-4" />
                 {block.title}
               </div>
-              <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground">
+              <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground md:text-[1.7rem] md:leading-9">
                 {block.anchor}
               </p>
             </div>

@@ -35,6 +35,7 @@ export function CurriculumReader({ book }: { book: Book }) {
   const storageKey = `curriculum:${book.slug}`;
   const [readerState, setReaderState] = useState<ReaderState>(emptyState);
   const [activeSection, setActiveSection] = useState(book.sections[0]?.id);
+  const [lessonProgress, setLessonProgress] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
@@ -78,6 +79,37 @@ export function CurriculumReader({ book }: { book: Book }) {
     return Math.round((readerState.completed.length / book.sections.length) * 100);
   }, [book.sections.length, readerState.completed.length]);
 
+  const activeTopLevelSection = useMemo(() => {
+    return (
+      book.sections.find(
+        (section) =>
+          section.id === activeSection ||
+          section.subsections?.some((subsection) => subsection.id === activeSection)
+      ) || book.sections[0]
+    );
+  }, [activeSection, book.sections]);
+
+  useEffect(() => {
+    const updateLessonProgress = () => {
+      if (!activeTopLevelSection) return;
+      const node = document.getElementById(activeTopLevelSection.id);
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      const viewportAnchor = Math.min(window.innerHeight * 0.35, 260);
+      const readableHeight = Math.max(rect.height - window.innerHeight * 0.55, 1);
+      const raw = (viewportAnchor - rect.top) / readableHeight;
+      setLessonProgress(Math.max(0, Math.min(100, Math.round(raw * 100))));
+    };
+
+    updateLessonProgress();
+    window.addEventListener("scroll", updateLessonProgress, { passive: true });
+    window.addEventListener("resize", updateLessonProgress);
+    return () => {
+      window.removeEventListener("scroll", updateLessonProgress);
+      window.removeEventListener("resize", updateLessonProgress);
+    };
+  }, [activeTopLevelSection]);
+
   const toggle = (key: keyof ReaderState, id: string) => {
     setReaderState((current) => {
       const exists = current[key].includes(id);
@@ -92,8 +124,8 @@ export function CurriculumReader({ book }: { book: Book }) {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card/45">
-        <div className="container py-6">
+      <div className="border-b border-border bg-card/40">
+        <div className="container py-7">
           <Button asChild variant="ghost" size="sm" className="-ml-3 mb-4">
             <Link href="/library">
               <ChevronLeft className="h-4 w-4" />
@@ -112,7 +144,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                 {book.description}
               </p>
             </div>
-            <div className="rounded-md border border-border bg-background/60 p-4">
+            <div className="rounded-md border border-border bg-background/55 p-4">
               <div className="mb-3 flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Reading progress</span>
                 <span className="font-medium">{progress}%</span>
@@ -123,6 +155,16 @@ export function CurriculumReader({ book }: { book: Book }) {
                 <span>{book.readingEstimateMinutes} min</span>
                 <span>{readerState.bookmarks.length} saved</span>
               </div>
+              <div className="mt-5 border-t border-border/70 pt-4">
+                <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Current lesson</span>
+                  <span>{lessonProgress}%</span>
+                </div>
+                <Progress value={lessonProgress} className="h-1.5" />
+                <p className="mt-3 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                  {activeTopLevelSection?.title}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -132,7 +174,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                 <Target className="h-4 w-4" />
                 What this curriculum teaches
               </div>
-              <p className="font-serif text-2xl leading-8 text-foreground">
+              <p className="font-serif text-2xl leading-8 text-foreground md:text-3xl md:leading-10">
                 {book.promise}
               </p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -179,20 +221,20 @@ export function CurriculumReader({ book }: { book: Book }) {
         </div>
       </div>
 
-      <div className="container grid gap-10 py-8 lg:grid-cols-[290px_minmax(0,760px)_220px] lg:py-12">
+      <div className="container grid gap-10 py-8 lg:grid-cols-[270px_minmax(0,800px)] lg:py-14 xl:grid-cols-[270px_minmax(0,800px)_200px]">
         <aside
           className={cn(
-            "lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto",
+            "lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto lg:pr-1",
             navOpen ? "block" : "hidden"
           )}
         >
-          <div className="rounded-md border border-border bg-card/70 p-4">
+          <div className="rounded-md border border-border bg-card/55 p-4">
             <div className="mb-4 flex items-center gap-2 text-sm font-medium">
               <ListTree className="h-4 w-4" />
               Curriculum Path
             </div>
-            <nav className="space-y-2">
-              {book.sections.map((section) => {
+            <nav className="space-y-1.5">
+              {book.sections.map((section, navIndex) => {
                 const done = readerState.completed.includes(section.id);
                 const active =
                   activeSection === section.id ||
@@ -206,25 +248,24 @@ export function CurriculumReader({ book }: { book: Book }) {
                     <a
                       href={`#${section.id}`}
                       className={cn(
-                        "flex items-start gap-3 rounded-md px-3 py-2 text-sm leading-5 transition-colors",
+                        "flex items-start gap-3 rounded-md px-3 py-2.5 text-sm leading-5 transition-colors",
                         active
-                          ? "bg-accent/20 text-foreground"
+                          ? "bg-accent/15 text-foreground"
                           : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                       )}
                     >
-                      <CheckCircle2
-                        className={cn(
-                          "mt-0.5 h-4 w-4 shrink-0",
-                          done ? "text-accent-foreground" : "opacity-35"
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-[0.65rem]">
+                        {done ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-accent-foreground" />
+                        ) : (
+                          navIndex + 1
                         )}
-                      />
+                      </span>
                       <span>
                         {section.title}
-                        {section.subsections?.length ? (
-                          <span className="mt-1 block text-xs text-muted-foreground/75">
-                            {section.subsections.length} study layers
-                          </span>
-                        ) : null}
+                        <span className="mt-1 block text-xs text-muted-foreground/75">
+                          {section.estimatedMinutes} min
+                        </span>
                       </span>
                     </a>
                     {section.subsections?.length ? (
@@ -273,24 +314,24 @@ export function CurriculumReader({ book }: { book: Book }) {
               <section
                 id={section.id}
                 key={section.id}
-                className="scroll-mt-28 border-b border-border/70 py-12 first:pt-0"
+                className="scroll-mt-28 border-b border-border/70 py-16 first:pt-0 md:py-20"
               >
-                <div className="mb-7 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  <span className="rounded-md border border-border px-2.5 py-1">
-                    {String(index + 1).padStart(2, "0")}
+                <div className="mb-8 flex flex-wrap items-center gap-3 font-sans text-sm text-muted-foreground">
+                  <span className="rounded-md border border-border bg-card/50 px-2.5 py-1">
+                    Lesson {String(index + 1).padStart(2, "0")}
                   </span>
                   <span>{section.eyebrow}</span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {section.estimatedMinutes} min
+                    {section.estimatedMinutes} min read
                   </span>
                 </div>
-                <div className="flex items-start justify-between gap-5">
+                <div className="flex items-start justify-between gap-5 border-b border-border/70 pb-8">
                   <div>
-                    <h2 className="font-serif text-4xl font-semibold tracking-normal md:text-5xl">
+                    <h2 className="max-w-3xl font-serif text-5xl font-semibold leading-[1.02] tracking-normal md:text-6xl">
                       {section.title}
                     </h2>
-                    <p className="mt-4 text-lg leading-8 text-muted-foreground">
+                    <p className="mt-5 max-w-3xl font-serif text-2xl leading-9 text-muted-foreground md:text-[1.7rem] md:leading-10">
                       {section.summary}
                     </p>
                   </div>
@@ -314,7 +355,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 </div>
 
-                <div className="mt-8 flex flex-wrap gap-2">
+                <div className="mt-7 flex flex-wrap gap-2">
                   {section.keyConcepts.map((concept) => (
                     <span
                       key={concept}
@@ -351,8 +392,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 ))}
 
-                <div className="mt-10 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-md border border-border bg-card/60 p-5">
+                <div className="mt-12 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-md border border-border bg-card/45 p-5">
                     <h3 className="font-serif text-2xl font-semibold">
                       Learning Objectives
                     </h3>
@@ -365,7 +406,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                       ))}
                     </ul>
                   </div>
-                  <div className="rounded-md border border-border bg-card/60 p-5">
+                  <div className="rounded-md border border-border bg-card/45 p-5">
                     <h3 className="font-serif text-2xl font-semibold">
                       Why It Matters
                     </h3>
@@ -375,8 +416,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 </div>
 
-                <div className="mt-10 grid gap-5 md:grid-cols-2">
-                  <div className="rounded-md border border-border bg-card/65 p-5">
+                <div className="mt-8 grid gap-5 md:grid-cols-2">
+                  <div className="rounded-md border border-border bg-card/45 p-5">
                     <h3 className="font-serif text-2xl font-semibold">
                       Applied Examples
                     </h3>
@@ -386,7 +427,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                       ))}
                     </ul>
                   </div>
-                  <div className="rounded-md border border-border bg-card/65 p-5">
+                  <div className="rounded-md border border-border bg-card/45 p-5">
                     <h3 className="font-serif text-2xl font-semibold">
                       Retention Notes
                     </h3>
@@ -398,7 +439,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-md border border-border bg-card/55 p-5">
+                <div className="mt-5 rounded-md border border-border bg-card/40 p-5">
                   <h3 className="font-serif text-2xl font-semibold">
                     Practical Application
                   </h3>
@@ -455,8 +496,8 @@ export function CurriculumReader({ book }: { book: Book }) {
           })}
         </article>
 
-        <aside className="hidden lg:block">
-          <div className="sticky top-24 rounded-md border border-border bg-card/60 p-4">
+        <aside className="hidden xl:block">
+          <div className="sticky top-24 rounded-md border border-border bg-card/50 p-4">
             <p className="text-sm font-medium">Study State</p>
             <div className="mt-4 space-y-4 text-sm text-muted-foreground">
               <div className="flex justify-between">
