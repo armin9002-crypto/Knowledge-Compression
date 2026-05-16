@@ -1,7 +1,7 @@
 import type { Book, ContentBlock, CurriculumSection } from "@/lib/types";
 import { estimateSectionsMinutes } from "@/content/utils/readingTime";
 
-type LessonDefinition = {
+type ChapterInput = {
   id: string;
   title: string;
   eyebrow: string;
@@ -9,24 +9,8 @@ type LessonDefinition = {
   summary: string;
   objectives: string[];
   concepts: string[];
-  thesis: string;
-  nuance: string;
-  mentalModel: {
-    name: string;
-    explanation: string;
-    useWhen: string;
-  };
-  scenario: string;
-  defaultApproach: string;
-  betterApproach: string;
-  whyItWorks: string;
-  applicationContext: string;
-  applicationSteps: string[];
-  applicationResult: string;
-  exerciseTitle: string;
-  exerciseInstructions: string;
-  exercisePrompts: string[];
-  reflection: string;
+  body: string[];
+  support: ContentBlock[];
   whyThisMatters: string;
   practicalApplication: string;
   commonMistakes: string[];
@@ -34,2690 +18,1232 @@ type LessonDefinition = {
     misconception: string;
     correction: string;
   }[];
-  retentionAnchors: string[];
+  reflection: string;
+  exercises: string[];
+  anchors: string[];
   takeaways: string[];
+  examples: string[];
   relatedSections?: string[];
 };
 
-function lesson(definition: LessonDefinition): CurriculumSection {
-  const blocks: ContentBlock[] = [
-    {
-      type: "paragraph",
-      text: definition.thesis
-    },
-    {
-      type: "conceptCard",
-      title: definition.concepts[0],
-      body: definition.summary,
-      whyItMatters: definition.whyThisMatters
-    },
-    {
-      type: "keyDistinction",
-      title: "Core distinction",
-      not: definition.defaultApproach,
-      but: definition.betterApproach
-    },
-    {
-      type: "mentalModel",
-      name: definition.mentalModel.name,
-      explanation: definition.mentalModel.explanation,
-      useWhen: definition.mentalModel.useWhen
-    },
-    {
-      type: "paragraph",
-      text: definition.nuance
-    },
-    {
-      type: "expandedExample",
-      scenario: definition.scenario,
-      defaultApproach: definition.defaultApproach,
-      betterApproach: definition.betterApproach,
-      whyItWorks: definition.whyItWorks
-    },
-    {
-      type: "application",
-      context: definition.applicationContext,
-      steps: definition.applicationSteps,
-      result: definition.applicationResult
-    },
-    {
-      type: "exercise",
-      title: definition.exerciseTitle,
-      instructions: definition.exerciseInstructions,
-      prompts: definition.exercisePrompts,
-      checklist: [
-        "Make the action specific",
-        "Reduce the first step until it can survive a busy day",
-        "Decide what evidence will show the system is working"
-      ]
-    },
-    {
-      type: "misconception",
-      misconception: definition.misconceptions[0].misconception,
-      correction: definition.misconceptions[0].correction,
-      whyItMatters: "Correcting this keeps the idea practical instead of turning it into another vague self-improvement slogan."
-    },
-    {
-      type: "reflectionPrompt",
-      id: `${definition.id}-reflection`,
-      question: definition.reflection,
-      helperText:
-        "Write a short answer you could use this week. The note is saved locally in this browser."
-    },
-    {
-      type: "retentionAnchor",
-      title: "Retention anchor",
-      anchor: definition.retentionAnchors[0]
-    }
-  ];
-
+function chapter(input: ChapterInput): CurriculumSection {
   return {
-    id: definition.id,
-    title: definition.title,
-    eyebrow: definition.eyebrow,
-    estimatedMinutes: definition.minutes,
-    summary: definition.summary,
-    learningObjectives: definition.objectives,
-    keyConcepts: definition.concepts,
-    blocks,
-    subsections: [
+    id: input.id,
+    title: input.title,
+    eyebrow: input.eyebrow,
+    estimatedMinutes: input.minutes,
+    summary: input.summary,
+    learningObjectives: input.objectives,
+    keyConcepts: input.concepts,
+    blocks: [
+      ...input.body.map(
+        (text): ContentBlock => ({
+          type: "paragraph",
+          text
+        })
+      ),
+      ...input.support,
       {
-        id: `${definition.id}-mechanism`,
-        title: "Mechanism",
-        blocks: [
-          {
-            type: "paragraph",
-            text: definition.thesis
-          },
-          {
-            type: "framework",
-            title: "How to apply this lesson",
-            stages: definition.applicationSteps.map((step, index) => ({
-              name: `Step ${index + 1}`,
-              description: step
-            }))
-          }
-        ],
-        keyPoints: definition.takeaways.slice(0, 3),
-        practicalApplication: definition.practicalApplication
+        type: "reflectionPrompt",
+        id: `${input.id}-reflection`,
+        question: input.reflection,
+        helperText:
+          "Write one practical answer. This note stays local to your browser."
       },
       {
-        id: `${definition.id}-practice`,
-        title: "Practice",
-        blocks: [
-          {
-            type: "checklist",
-            title: "Implementation checklist",
-            items: definition.exercisePrompts
-          },
-          {
-            type: "synthesis",
-            title: "Lesson compression",
-            text: definition.retentionAnchors.join(" ")
-          }
-        ],
-        examples: [definition.scenario],
-        keyPoints: definition.commonMistakes
+        type: "retentionAnchor",
+        title: "Retention anchor",
+        anchor: input.anchors[0]
       }
     ],
-    appliedExamples: [
-      definition.scenario,
-      definition.applicationContext,
-      definition.whyItWorks
-    ],
-    whyThisMatters: definition.whyThisMatters,
-    practicalApplication: definition.practicalApplication,
-    commonMistakes: definition.commonMistakes,
-    misconceptions: definition.misconceptions,
-    reflectionPrompts: [definition.reflection],
-    implementationExercises: [
-      definition.exerciseInstructions,
-      ...definition.exercisePrompts
-    ],
-    retentionAnchors: definition.retentionAnchors,
-    takeaways: definition.takeaways,
-    relatedSections: definition.relatedSections
+    appliedExamples: input.examples,
+    whyThisMatters: input.whyThisMatters,
+    practicalApplication: input.practicalApplication,
+    commonMistakes: input.commonMistakes,
+    misconceptions: input.misconceptions,
+    reflectionPrompts: [input.reflection],
+    implementationExercises: input.exercises,
+    retentionAnchors: input.anchors,
+    takeaways: input.takeaways,
+    relatedSections: input.relatedSections
   };
 }
 
-const definitions: LessonDefinition[] = [
-  {
-    id: "core-thesis",
-    title: "The Core Thesis: Tiny Behaviors, Large Outcomes",
-    eyebrow: "Orientation",
-    minutes: 12,
+const atomicSections: CurriculumSection[] = [
+  chapter({
+    id: "real-power-small-habits",
+    title: "The Real Power of Small Habits",
+    eyebrow: "Foundation",
+    minutes: 28,
     summary:
-      "Atomic Habits teaches that repeated small behaviors become the architecture of identity, capability, and results.",
+      "Small habits matter because they are repeatable units of change that compound into identity, capability, and environment.",
     objectives: [
-      "Understand why small habits are strategic rather than trivial",
-      "Connect repeated behavior to identity and outcomes",
-      "Diagnose behavior through systems instead of intention alone"
+      "Understand why tiny behaviors are powerful only when they compound",
+      "Separate meaningful consistency from shallow life hacks",
+      "See habits as the architecture beneath visible outcomes"
     ],
-    concepts: ["behavioral compound interest", "systems", "identity evidence"],
-    thesis:
-      "The central insight is that life changes less through occasional intensity than through behaviors that survive long enough to compound. A small habit is not valuable because the single action is impressive. It is valuable because it is repeatable, and repetition gives time something to multiply.",
-    nuance:
-      "The book can be misread as a celebration of tiny actions for their own sake. The deeper point is design. Tiny behaviors work when they are connected to a system, pointed at a meaningful identity, and repeated under real conditions. A tiny behavior that never scales, never teaches, and never compounds is merely small.",
-    mentalModel: {
-      name: "Behavioral interest",
-      explanation:
-        "A habit is a deposit into a future capability. The individual deposit is modest; the accumulation changes what is easy, normal, and available.",
-      useWhen:
-        "Use this when a useful behavior feels too small to matter or when you are tempted to wait for a dramatic starting point."
-    },
-    scenario:
-      "A reader wants to become well-read but repeatedly waits for a free weekend to make progress.",
-    defaultApproach:
-      "Treat reading as a large event requiring open time, high energy, and the perfect book mood.",
-    betterApproach:
-      "Create a daily ten-page reading slot after coffee and track one sentence worth remembering.",
-    whyItWorks:
-      "The new system lowers the activation cost, creates a recurring cue, and turns each session into identity evidence.",
-    applicationContext: "How to begin a serious reading habit without relying on rare bursts of motivation",
-    applicationSteps: [
-      "Choose one stable daily anchor such as coffee, lunch, or the train",
-      "Place the book where the anchor happens",
-      "Read a minimum so small it feels almost too easy",
-      "Capture one idea to make the reward immediate",
-      "Review progress weekly instead of judging each day emotionally"
+    concepts: ["compounding", "behavioral systems", "latent progress"],
+    body: [
+      "Atomic Habits begins from a deceptively simple observation: most meaningful change is not produced by a single dramatic act. It is produced by repeated behavior that becomes part of the structure of life. A tiny habit is not impressive because the individual action is large. It is powerful because it can be repeated when energy is ordinary, time is limited, and motivation is not especially high.",
+      "That distinction matters. Many people dismiss small habits because they compare the size of the action with the size of the desired outcome. Reading five pages feels laughably small compared with becoming intellectually serious. Walking for ten minutes feels too modest compared with getting healthy. Saving a small amount feels irrelevant compared with building wealth. But the first question is not whether the action looks impressive today. The first question is whether it can survive long enough to compound.",
+      "Compounding in behavior is broader than arithmetic. A repeated action changes skill, attention, self-trust, identity, and defaults. The person who reads each morning becomes faster at entering the reading state. The person who writes a few sentences daily lowers the emotional cost of a blank page. The person who walks after lunch starts to see movement as normal rather than exceptional. Over time, the action reshapes the person who performs it.",
+      "This is why the book is not really about tiny behaviors in isolation. A small habit with no direction, no feedback, and no connection to a meaningful identity is just a small behavior. The deeper idea is system design. You are looking for behaviors that are small enough to repeat and meaningful enough to become evidence for the life you are building.",
+      "The early phase of a habit is often emotionally unrewarding because effort is visible before results are. This is where many people quit. They judge the system by lagging outcomes instead of leading behaviors. The better question is: Is the behavior becoming more automatic? Is the environment making it easier? Is the identity becoming more believable? Those are signs that the compounding engine has started even if the visible result has not arrived."
     ],
-    applicationResult:
-      "Reading becomes an ordinary part of the day rather than a project that requires ideal conditions.",
-    exerciseTitle: "Find the smallest serious version",
-    exerciseInstructions:
-      "Choose one meaningful behavior and reduce it until it can be repeated on a difficult weekday.",
-    exercisePrompts: [
-      "What future identity does this behavior support?",
-      "What is the smallest version that still counts as evidence?",
-      "Where will the behavior live in the day?"
+    support: [
+      {
+        type: "keyDistinction",
+        title: "Small is not the same as trivial",
+        not: "A tiny habit is not a miniature motivational trick that magically replaces serious effort.",
+        but: "It is the repeatable entry point into a larger system of identity, practice, feedback, and compounding."
+      },
+      {
+        type: "expandedExample",
+        scenario:
+          "A reader wants to become someone who deeply understands important nonfiction.",
+        defaultApproach:
+          "Wait for long uninterrupted weekends and attempt large reading sessions that happen irregularly.",
+        betterApproach:
+          "Read a small number of pages after coffee, write one sentence of compression, and review those notes weekly.",
+        whyItWorks:
+          "The behavior is small enough to repeat, but it still preserves the seriousness of the identity: a person who studies ideas carefully."
+      },
+      {
+        type: "exercise",
+        title: "Find the smallest serious version",
+        instructions:
+          "Choose one behavior you care about and reduce it until it can survive a busy weekday without becoming meaningless.",
+        prompts: [
+          "What larger identity does this behavior support?",
+          "What is the smallest version that still counts as real evidence?",
+          "What leading signal will show the system is taking root?"
+        ]
+      }
     ],
-    reflection:
-      "Which important behavior have you dismissed because the repeatable version looked too small?",
     whyThisMatters:
-      "Most people underestimate actions that look unimpressive in the moment and overestimate plans that require ideal conditions.",
+      "People often abandon useful systems because early progress is quiet. Understanding compounding helps you stay with the behaviors that are building capacity beneath the surface.",
     practicalApplication:
-      "Convert one desired outcome into a tiny daily behavior with a visible cue and an immediate record of completion.",
+      "Pick one behavior that is small enough to repeat daily or weekly, then track the leading behavior rather than waiting for the final result to validate the effort.",
     commonMistakes: [
-      "Confusing small with unserious",
-      "Designing the ideal version before the repeatable version",
-      "Expecting visible results before repetition has had time to accumulate"
+      "Treating small habits as a substitute for serious effort",
+      "Expecting visible outcomes before enough repetitions accumulate",
+      "Choosing a tiny action that has no meaningful connection to the desired identity"
     ],
     misconceptions: [
       {
-        misconception: "Atomic habits are just tiny life hacks.",
+        misconception: "Atomic Habits is saying tiny actions are enough by themselves.",
         correction:
-          "They are small units of system design that become powerful when they compound and reinforce identity."
+          "Tiny actions are the starting units of a system. They matter when they repeat, compound, and scale into deeper capability."
       }
-    ],
-    retentionAnchors: [
-      "Small is strategic when it is repeatable, meaningful, and allowed to compound.",
-      "The question is not whether the action is impressive today; it is whether it can become evidence for months."
-    ],
-    takeaways: [
-      "Habits are designable systems, not mere intentions.",
-      "Tiny behaviors earn their power through repetition.",
-      "The early goal is continuity, not spectacle."
-    ],
-    relatedSections: ["systems-vs-goals", "identity-based-behavior-change"]
-  },
-  {
-    id: "small-habits-compound",
-    title: "Why Small Habits Compound",
-    eyebrow: "Compounding",
-    minutes: 11,
-    summary:
-      "Small gains matter because repeated behavior changes skill, environment, identity, and future options at the same time.",
-    objectives: [
-      "Understand nonlinear progress",
-      "Separate visible outcomes from hidden accumulation",
-      "Identify leading indicators for habit progress"
-    ],
-    concepts: ["compound returns", "leading indicators", "delayed payoff"],
-    thesis:
-      "Compounding is not only mathematical. In behavior, repetition builds fluency, reduces friction, trains attention, and changes what feels normal. A habit can be producing value before the obvious outcome appears because capability is accumulating below the surface.",
-    nuance:
-      "Small habits do not compound automatically. They compound when the repeated action is directionally useful and paired with feedback. Repeating a weak behavior can also compound in the wrong direction, which is why awareness and review matter.",
-    mentalModel: {
-      name: "The invisible ledger",
-      explanation:
-        "Every repeated action creates entries in a hidden ledger of skill, identity, trust, and ease. Results appear after the ledger has accumulated enough weight.",
-      useWhen:
-        "Use this when early progress feels absent but your leading behaviors are becoming more consistent."
-    },
-    scenario:
-      "A person starts exercising three times per week but sees little visible change after two weeks.",
-    defaultApproach:
-      "Decide the plan is not working because the mirror has not changed.",
-    betterApproach:
-      "Track attendance, energy, recovery, and strength as early signs that the system is taking root.",
-    whyItWorks:
-      "The person measures the behavior that creates the outcome instead of demanding the final outcome too early.",
-    applicationContext: "How to stay with a learning or health habit while results lag",
-    applicationSteps: [
-      "Define the lagging outcome you eventually want",
-      "List the leading behaviors that make it likely",
-      "Track the leading behaviors for four weeks",
-      "Review whether the behavior is easier, faster, or more natural",
-      "Adjust the system only after enough repetitions to see a pattern"
-    ],
-    applicationResult:
-      "The habit survives the emotionally difficult period where effort is visible and results are delayed.",
-    exerciseTitle: "Build a leading indicator dashboard",
-    exerciseInstructions:
-      "Choose one goal and define three measures that show the system is working before the outcome arrives.",
-    exercisePrompts: [
-      "What outcome will lag?",
-      "What behavior predicts it?",
-      "What will you track weekly?"
     ],
     reflection:
-      "Where are you quitting because the outcome is delayed, even though the system may be improving?",
-    whyThisMatters:
-      "Delayed rewards make good systems emotionally fragile unless the learner can see proof of progress earlier.",
-    practicalApplication:
-      "Track attendance, repetitions, pages, drafts, or conversations before judging weight loss, expertise, revenue, or reputation.",
-    commonMistakes: [
-      "Measuring only the final outcome",
-      "Changing the plan before enough repetitions accumulate",
-      "Ignoring the compounding of negative defaults"
+      "Where are you underestimating a small behavior because it does not look impressive yet?",
+    exercises: [
+      "Write one small behavior that supports an identity you care about.",
+      "Define one leading indicator you can track for four weeks.",
+      "Review whether the behavior is becoming easier before judging the outcome."
     ],
-    misconceptions: [
-      {
-        misconception: "If a habit is working, results should appear quickly.",
-        correction:
-          "Many valuable systems produce invisible accumulation before visible change."
-      }
-    ],
-    retentionAnchors: [
-      "Compounding begins before it becomes visible.",
-      "Track the behavior that produces the result before judging the result itself."
+    anchors: [
+      "Small habits are powerful when they are repeatable, directional, and allowed to compound.",
+      "Judge early habits by leading behaviors before judging them by lagging outcomes."
     ],
     takeaways: [
-      "Leading indicators protect patience.",
-      "Small habits compound through skill, ease, and identity.",
-      "Bad habits compound too."
+      "Habits are the invisible architecture beneath results.",
+      "The repeatable version is often more valuable than the heroic version.",
+      "Compounding begins before progress becomes visible."
     ],
-    relatedSections: ["plateaus-delayed-results", "habit-tracking-feedback"]
-  },
-  {
-    id: "identity-based-behavior-change",
+    examples: [
+      "Reading five pages after coffee becomes a durable learning identity.",
+      "A ten-minute walk after lunch creates a health default before fitness outcomes are visible.",
+      "A small automatic transfer builds the identity of someone who protects future options."
+    ],
+    relatedSections: ["identity-based-change", "systems-over-goals"]
+  }),
+  chapter({
+    id: "identity-based-change",
     title: "Identity-Based Behavior Change",
     eyebrow: "Identity",
-    minutes: 14,
+    minutes: 32,
     summary:
-      "The deepest habit change happens when repeated behavior becomes evidence for the kind of person you believe yourself to be.",
+      "The deepest form of habit change works by creating repeated evidence for the kind of person you believe you are becoming.",
     objectives: [
-      "Explain why identity can outlast motivation",
-      "Use evidence-based identity language",
-      "Avoid rigid or shame-based identity traps"
+      "Understand why identity can be more durable than motivation",
+      "Learn how identity is built through evidence",
+      "Avoid rigid identity language that creates shame or limitation"
     ],
     concepts: ["identity evidence", "self-consistency", "behavioral votes"],
-    thesis:
-      "Identity-based habits begin with the person you are practicing becoming. The behavior matters not just because it produces an outcome, but because it casts a vote for a self-concept. Over time, repeated evidence makes the behavior feel less like negotiation and more like self-consistency.",
-    nuance:
-      "Identity is powerful precisely because it can become limiting. A useful identity should be directional, not brittle. The goal is not to declare, I never miss. The goal is to gather evidence that you return, repair, practice, learn, and continue.",
-    mentalModel: {
-      name: "Votes for the self",
-      explanation:
-        "Each repetition is a vote. No single vote decides the election, but repeated votes change the story you find believable about yourself.",
-      useWhen:
-        "Use this when a habit feels external, forced, or dependent on temporary motivation."
-    },
-    scenario:
-      "Someone wants to save money but thinks of themselves as bad with money.",
-    defaultApproach:
-      "Try to force a large savings target while keeping the same self-story.",
-    betterApproach:
-      "Create a tiny automatic transfer and review it as proof: I am someone who protects future options.",
-    whyItWorks:
-      "The action is small enough to repeat and meaningful enough to contradict the old identity with evidence.",
-    applicationContext: "How to apply identity-based habits to money",
-    applicationSteps: [
-      "Name the identity in plain language",
-      "Choose one behavior that proves it at low cost",
-      "Make the behavior automatic or anchored",
-      "Review the evidence weekly",
-      "Increase the behavior only after the identity feels believable"
+    body: [
+      "One of the book's most important contributions is the shift from outcome-based change to identity-based change. Outcome-based change asks, What result do I want? Identity-based change asks, Who is the kind of person who naturally produces that result? The second question reaches deeper because it connects behavior to self-understanding rather than temporary pressure.",
+      "Identity is not built by declaring a slogan. It is built through evidence. Each repetition is a small vote for a self-concept. A person who writes every morning, even briefly, gathers evidence that they are a writer. A person who keeps a weekly money review gathers evidence that they are financially responsible. A person who returns to exercise after missing a session gathers evidence that they are someone who repairs rather than abandons.",
+      "This is why identity can be stronger than motivation. Motivation asks you to push against resistance. Identity changes the meaning of the behavior. If reading is merely a task, it competes with every other task. If reading is evidence that you are a serious student of ideas, the behavior has a different emotional gravity. You are not just finishing pages; you are reinforcing who you are becoming.",
+      "There is also a danger here. Identity can liberate, but it can also imprison. People carry old identity statements such as I am bad with money, I never finish things, I am not athletic, or I am not a reader. These statements feel descriptive, but they also become instructions. They make certain behaviors feel unnatural before the person even begins.",
+      "The way out is not fake confidence. The way out is small proof. Instead of trying to believe a new identity all at once, create evidence that makes the new identity increasingly credible. The person who thinks they are bad with money can automate a tiny transfer. The person who thinks they never finish can complete a small weekly review. The person who thinks they are not athletic can become someone who walks after lunch. Identity follows accumulated proof.",
+      "A healthy identity is directional rather than brittle. I am someone who trains is more useful than I never miss a workout. I am someone who returns is more durable than I am perfectly consistent. The best identity language makes good behavior easier without turning imperfection into a crisis."
     ],
-    applicationResult:
-      "Financial change begins as identity proof rather than a fight against an old label.",
-    exerciseTitle: "Write identity evidence, not affirmations",
-    exerciseInstructions:
-      "Turn one aspiration into an identity statement and one tiny proof behavior.",
-    exercisePrompts: [
-      "Who is the kind of person who would naturally do this?",
-      "What tiny action would count as evidence today?",
-      "What old identity needs less attention?"
+    support: [
+      {
+        type: "callout",
+        title: "Identity principle",
+        text: "You do not think your way into a new identity first. You gather enough behavioral evidence that the new identity becomes believable."
+      },
+      {
+        type: "expandedExample",
+        scenario:
+          "Someone wants to become better with money but carries the identity that they are irresponsible.",
+        defaultApproach:
+          "Set an aggressive savings goal, fail to maintain it, and use the failure as more evidence for the old identity.",
+        betterApproach:
+          "Automate a small transfer on payday and review it weekly as proof: I am someone who protects future options.",
+        whyItWorks:
+          "The behavior is modest enough to repeat, but meaningful enough to challenge the old identity with evidence."
+      },
+      {
+        type: "misconception",
+        misconception: "Identity-based habits are just affirmations.",
+        correction:
+          "They are evidence loops. The identity becomes believable because repeated action makes it harder to deny.",
+        whyItMatters:
+          "Without evidence, identity language becomes decoration. With evidence, it becomes a stabilizing force."
+      },
+      {
+        type: "exercise",
+        title: "Build identity evidence",
+        instructions:
+          "Choose one identity you want to strengthen and pair it with one proof behavior.",
+        prompts: [
+          "Who is the kind of person who would naturally do this?",
+          "What tiny action would count as evidence this week?",
+          "What old identity statement needs less authority over your choices?"
+        ]
+      }
     ],
-    reflection:
-      "What behavior would give you credible evidence for an identity you want to strengthen?",
     whyThisMatters:
-      "Motivation asks you to push. Identity changes what feels natural to repeat.",
+      "Habits last longer when they are connected to self-consistency instead of depending only on mood, pressure, or external rewards.",
     practicalApplication:
-      "Use identity language only when it is paired with a proof behavior; otherwise it becomes decoration.",
+      "For any habit you want to build, write the identity it supports and the smallest behavior that can provide credible evidence for that identity.",
     commonMistakes: [
-      "Using identity statements as slogans without evidence",
-      "Choosing identities so rigid that a missed day becomes a crisis",
-      "Letting old labels explain behavior instead of redesigning behavior"
+      "Using identity statements without proof behaviors",
+      "Choosing rigid identities that turn missed days into shame",
+      "Letting old labels explain behavior instead of redesigning evidence"
     ],
     misconceptions: [
       {
-        misconception: "Identity-based habits are positive affirmations.",
+        misconception: "You need to fully believe the new identity before acting.",
         correction:
-          "They are evidence loops: repeated proof gradually changes what you believe about yourself."
+          "Often you act first in small ways, then belief catches up as evidence accumulates."
       }
     ],
-    retentionAnchors: [
+    reflection:
+      "What small behavior would give you credible evidence for the person you want to become?",
+    exercises: [
+      "Write one identity sentence: I am becoming someone who...",
+      "Choose one proof behavior that takes less than ten minutes.",
+      "Review the proof weekly without demanding perfection."
+    ],
+    anchors: [
       "Identity follows evidence.",
-      "You become the kind of person your repeated proof makes believable."
+      "Every repetition is a vote, not a final verdict."
     ],
     takeaways: [
-      "Behavior is a vote for identity.",
-      "Identity makes habits more durable than motivation.",
-      "Healthy identity is directional, not perfectionistic."
+      "Identity-based change reaches deeper than outcome-based change.",
+      "Small actions matter because they become self-evidence.",
+      "Useful identities are flexible, humane, and supported by behavior."
     ],
-    relatedSections: ["outcomes-processes-identity", "consistency-recovery"]
-  },
-  {
-    id: "outcomes-processes-identity",
-    title: "Outcomes vs Processes vs Identity",
-    eyebrow: "Levels",
-    minutes: 11,
-    summary:
-      "Behavior change works at three levels: what you get, what you do, and who you believe you are becoming.",
-    objectives: [
-      "Distinguish outcome, process, and identity levels",
-      "Convert outcomes into repeatable systems",
-      "Use identity as a stabilizing layer beneath behavior"
+    examples: [
+      "A reader becomes a serious learner by keeping a daily study appointment.",
+      "A saver becomes financially responsible through repeated proof, not one dramatic budget.",
+      "A healthy person identity can begin with a reliable walk, not a complete fitness overhaul."
     ],
-    concepts: ["outcomes", "processes", "identity"],
-    thesis:
-      "Outcomes describe the result, processes describe the recurring behavior, and identity describes the self-concept that makes the behavior coherent. Most plans start at the outcome and stop there. Atomic Habits pushes deeper: define the process that produces the outcome and the identity that makes the process worth repeating.",
-    nuance:
-      "Outcomes are not bad. They provide direction and standards. The problem is treating the outcome as the plan. A target weight, revenue number, or reading goal does not tell you what happens Tuesday at 7:30 a.m.",
-    mentalModel: {
-      name: "Three-layer change",
-      explanation:
-        "Outcome is the destination, process is the route, identity is the traveler learning to walk that route.",
-      useWhen:
-        "Use this when a goal is clear but your daily behavior still feels vague."
-    },
-    scenario:
-      "A professional wants to become a better public speaker.",
-    defaultApproach:
-      "Set a goal to be confident on stage someday.",
-    betterApproach:
-      "Practice one two-minute explanation after lunch three days a week and adopt the identity of a person who clarifies ideas aloud.",
-    whyItWorks:
-      "The plan connects the desired outcome to a repeatable process and a self-concept that supports the behavior.",
-    applicationContext: "How to convert a goal into a daily or weekly practice",
-    applicationSteps: [
-      "Write the desired outcome",
-      "Ask what recurring behavior would make it likely",
-      "Attach that behavior to a real context",
-      "Name the identity the behavior expresses",
-      "Review the process before judging the outcome"
-    ],
-    applicationResult:
-      "The goal becomes operational instead of aspirational.",
-    exerciseTitle: "Translate one goal through all three layers",
-    exerciseInstructions:
-      "Take one goal and write its outcome, process, and identity versions.",
-    exercisePrompts: [
-      "What result do you want?",
-      "What recurring behavior creates it?",
-      "What identity does that behavior practice?"
-    ],
-    reflection:
-      "Which of your goals has a destination but no route?",
-    whyThisMatters:
-      "A goal without a process creates pressure but not progress.",
-    practicalApplication:
-      "For every major outcome, define one process metric and one identity sentence supported by evidence.",
-    commonMistakes: [
-      "Mistaking a target for a plan",
-      "Choosing too many processes for one outcome",
-      "Using identity language without a behavior attached"
-    ],
-    misconceptions: [
-      {
-        misconception: "Atomic Habits says goals do not matter.",
-        correction:
-          "Goals matter for direction; systems and identity matter for repeatable movement."
-      }
-    ],
-    retentionAnchors: [
-      "Outcome points. Process moves. Identity stabilizes.",
-      "A goal is not a plan until it has a recurring behavior."
-    ],
-    takeaways: [
-      "Use outcomes for direction.",
-      "Use processes for execution.",
-      "Use identity for durability."
-    ],
-    relatedSections: ["systems-vs-goals"]
-  },
-  {
+    relatedSections: ["real-power-small-habits", "systems-over-goals"]
+  }),
+  chapter({
     id: "habit-loop",
     title: "The Habit Loop: Cue, Craving, Response, Reward",
     eyebrow: "Mechanism",
-    minutes: 13,
+    minutes: 30,
     summary:
-      "Habits are feedback loops: a cue predicts a reward, craving creates desire, response delivers behavior, and reward teaches repetition.",
+      "Habits are loops: a cue predicts a reward, craving creates desire, response performs the behavior, and reward teaches repetition.",
     objectives: [
-      "Identify the four parts of any habit",
-      "Diagnose which part of a habit loop is failing",
+      "Understand the four-part structure of habits",
+      "Diagnose why a habit succeeds or fails",
       "Design replacement behaviors that satisfy the real craving"
     ],
     concepts: ["cue", "craving", "response", "reward"],
-    thesis:
-      "A habit is a loop, not an isolated action. The cue tells the brain an opportunity is available. The craving is the desire for a state change. The response is the behavior. The reward satisfies the craving and teaches the brain whether the loop is worth repeating.",
-    nuance:
-      "The craving is often misunderstood. People do not always crave the object itself; they crave relief, certainty, stimulation, belonging, closure, or control. That is why replacing a bad habit requires understanding the job it performs.",
-    mentalModel: {
-      name: "Behavior diagnosis",
-      explanation:
-        "When a habit fails, ask which loop element is weak: cue, craving, response, or reward.",
-      useWhen:
-        "Use this when you keep blaming discipline but have not inspected the mechanics of the behavior."
-    },
-    scenario:
-      "A worker checks email constantly during deep work blocks.",
-    defaultApproach:
-      "Tell themselves to stop being distracted.",
-    betterApproach:
-      "Identify the craving for certainty, schedule email checks, remove badges, and create a visible task queue for reassurance.",
-    whyItWorks:
-      "The replacement addresses the actual craving while changing the cue and response path.",
-    applicationContext: "How to tell whether a habit failed because of cue, craving, response, or reward",
-    applicationSteps: [
-      "Write the unwanted behavior",
-      "Identify the cue that usually precedes it",
-      "Name the state change you want",
-      "List the easiest response currently available",
-      "Design a better response that still satisfies the underlying craving"
+    body: [
+      "The habit loop is the operating mechanism beneath the book's practical advice. A cue signals that a reward may be available. A craving creates desire for a state change. A response is the behavior itself. A reward satisfies the craving and teaches the brain whether the loop is worth repeating.",
+      "This model is useful because it makes behavior inspectable. Instead of treating a habit as a mysterious failure of character, you can ask where the loop begins. What cue starts it? What state are you trying to reach? What response is easiest in that moment? What reward keeps the loop alive?",
+      "The craving is especially important. People often assume they crave the object of the habit, but often they crave the internal state the object promises. Email checking may be a craving for certainty. Snacking may be a craving for relief. Scrolling may be a craving for stimulation, escape, or social connection. If you replace the behavior without addressing the state change, the old habit usually returns.",
+      "This is why many habit plans fail. They focus on the visible behavior while ignoring the invisible function. A person says, I need to stop checking my phone, but the phone is providing relief from boredom and uncertainty. A person says, I need to stop procrastinating, but procrastination is providing temporary escape from ambiguity or fear. The replacement has to solve the real problem better.",
+      "The four laws of behavior change are built on this loop. Make it obvious addresses the cue. Make it attractive addresses the craving. Make it easy addresses the response. Make it satisfying addresses the reward. The laws are not random tips; they are interventions at different points in the loop."
     ],
-    applicationResult:
-      "The habit becomes inspectable and redesignable instead of mysterious.",
-    exerciseTitle: "Map one habit loop",
-    exerciseInstructions:
-      "Choose one repeated behavior and map cue, craving, response, and reward.",
-    exercisePrompts: [
-      "What happens right before the behavior?",
-      "What feeling are you trying to create or remove?",
-      "What reward teaches you to repeat it?"
-    ],
-    reflection:
-      "Which recurring behavior makes more sense when you view it as an attempt to change your internal state?",
-    whyThisMatters:
-      "A habit can be redesigned only after its function is understood.",
-    practicalApplication:
-      "Use the four-part loop as a diagnostic template before adding more effort.",
-    commonMistakes: [
-      "Treating the visible behavior as the entire habit",
-      "Replacing a habit without satisfying the craving",
-      "Ignoring the reward that keeps the loop alive"
-    ],
-    misconceptions: [
+    support: [
       {
-        misconception: "Bad habits are irrational.",
-        correction:
-          "Many bad habits are rational short-term solutions with expensive long-term consequences."
+        type: "diagram",
+        title: "The habit loop",
+        steps: [
+          "Cue: notice an opportunity",
+          "Craving: desire a state change",
+          "Response: perform the behavior",
+          "Reward: learn whether to repeat"
+        ]
+      },
+      {
+        type: "expandedExample",
+        scenario:
+          "A knowledge worker checks email repeatedly during a writing block.",
+        defaultApproach:
+          "Blame distraction and promise to focus harder tomorrow.",
+        betterApproach:
+          "Recognize the craving for certainty, schedule message checks, remove inbox cues, and use a visible task list for reassurance.",
+        whyItWorks:
+          "The new design addresses the craving and changes the cue, instead of merely scolding the response."
+      },
+      {
+        type: "exercise",
+        title: "Map one loop",
+        instructions:
+          "Choose one repeated behavior, helpful or harmful, and map it through the four-part loop.",
+        prompts: [
+          "What cue usually appears before the behavior?",
+          "What state change do you want in that moment?",
+          "What reward teaches you to repeat the behavior?"
+        ]
       }
     ],
-    retentionAnchors: [
-      "Cue predicts. Craving wants. Response acts. Reward teaches.",
-      "Change the loop, not just the visible action."
-    ],
-    takeaways: [
-      "Every habit has a structure.",
-      "Cravings reveal the job a habit performs.",
-      "Rewards train repetition."
-    ],
-    relatedSections: ["breaking-bad-habits-inversion"]
-  },
-  {
-    id: "first-law-obvious",
-    title: "The First Law: Make It Obvious",
-    eyebrow: "Law 1",
-    minutes: 12,
-    summary:
-      "Good habits become easier when their cues are visible, specific, and placed where the behavior should happen.",
-    objectives: [
-      "Understand why cues drive behavior",
-      "Design visible triggers for good habits",
-      "Reduce ambiguity in when and where action begins"
-    ],
-    concepts: ["cue design", "visibility", "specificity"],
-    thesis:
-      "The first law is about attention. A behavior that is not cued must compete with the entire day. When the cue is visible and specific, the mind has less deciding to do. Obvious cues transform a vague intention into a concrete invitation.",
-    nuance:
-      "Making a cue obvious does not mean making the whole environment noisy. It means placing the right signal in the right context. A visible book on a reading chair is useful; a dozen reminders across every device becomes clutter.",
-    mentalModel: {
-      name: "Attention architecture",
-      explanation:
-        "What your environment repeatedly brings to attention becomes more likely to become behavior.",
-      useWhen:
-        "Use this when you forget a habit or rely on memory at the moment of action."
-    },
-    scenario:
-      "Someone wants to stretch daily but remembers only when they are already in bed.",
-    defaultApproach:
-      "Promise to remember tomorrow.",
-    betterApproach:
-      "Put the stretching mat beside the bathroom door and stretch after brushing teeth.",
-    whyItWorks:
-      "The cue appears in the exact context where the behavior should begin.",
-    applicationContext: "How to design cues for a morning routine",
-    applicationSteps: [
-      "Choose the behavior",
-      "Choose the place it should happen",
-      "Place a physical cue there",
-      "Pair the cue with a stable existing routine",
-      "Remove competing cues from the same context"
-    ],
-    applicationResult:
-      "The desired action becomes visible before the day can bury it.",
-    exerciseTitle: "Install one obvious cue",
-    exerciseInstructions:
-      "Design a cue that appears in the precise location where your habit should start.",
-    exercisePrompts: [
-      "Where should the behavior happen?",
-      "What object or signal can live there?",
-      "What competing cue should be removed?"
-    ],
-    reflection:
-      "Which habit is currently invisible until the moment has already passed?",
     whyThisMatters:
-      "Forgetting is often an environment problem disguised as a character problem.",
+      "When you can see the loop, you can redesign behavior with precision instead of relying on vague discipline.",
     practicalApplication:
-      "Use physical placement, calendar blocks, and visual defaults to make the next right action hard to miss.",
+      "Before changing a habit, map its cue, craving, response, and reward. Then choose the weakest or most accessible point for intervention.",
     commonMistakes: [
-      "Using vague reminders instead of contextual cues",
-      "Putting cues where action cannot happen",
-      "Adding cues without removing competing cues"
+      "Treating the visible action as the entire habit",
+      "Ignoring the emotional job the habit performs",
+      "Replacing a habit with a behavior that does not satisfy the craving"
     ],
     misconceptions: [
       {
+        misconception: "Bad habits are simply irrational.",
+        correction:
+          "Many bad habits are effective short-term solutions with costly long-term consequences."
+      }
+    ],
+    reflection:
+      "Which habit makes more sense when you view it as an attempt to change your internal state?",
+    exercises: [
+      "Map one habit loop in writing.",
+      "Name the craving behind the behavior.",
+      "Design one replacement that satisfies the craving with fewer downstream costs."
+    ],
+    anchors: [
+      "Cue predicts. Craving wants. Response acts. Reward teaches.",
+      "Change the loop, not just the visible behavior."
+    ],
+    takeaways: [
+      "Habits are feedback loops.",
+      "Cravings often reveal the emotional function of a habit.",
+      "The four laws intervene at different points in the loop."
+    ],
+    examples: [
+      "Checking email can be a craving for certainty.",
+      "Late-night scrolling can be a craving for decompression.",
+      "Exercise can become a reward loop when it reliably creates relief and identity proof."
+    ],
+    relatedSections: ["make-it-obvious", "breaking-bad-habits"]
+  }),
+  chapter({
+    id: "make-it-obvious",
+    title: "Make It Obvious",
+    eyebrow: "First Law",
+    minutes: 34,
+    summary:
+      "The first law is about cues: make good habits visible, specific, and attached to contexts where action can actually happen.",
+    objectives: [
+      "Use cues to make good habits easier to remember",
+      "Understand implementation intentions and habit stacking",
+      "Design environments where the desired action is visible at the right moment"
+    ],
+    concepts: ["cue design", "implementation intentions", "habit stacking", "environment design"],
+    body: [
+      "A habit that is not cued has to be remembered from scratch. That is a fragile arrangement. The modern day is full of competing signals, and attention is not a neutral field. What is visible, urgent, nearby, or socially reinforced gets an advantage. The first law, make it obvious, is about giving the desired behavior a clear signal before the moment passes.",
+      "This begins with awareness. Many habits are invisible because they have become automatic. A habit scorecard helps by turning the day into something you can inspect. You list recurring actions and notice whether each one supports, harms, or has little effect on the person you want to become. The point is not self-judgment. The point is seeing the routine clearly enough to edit it.",
+      "Once you can see the routine, you can make new behaviors more specific. Implementation intentions do this by defining when and where the behavior will happen. I will read more is weak because it leaves the day to decide. I will read for fifteen minutes at the kitchen table after breakfast gives the behavior a time, place, and beginning.",
+      "Habit stacking adds another layer. Instead of asking a new behavior to float somewhere in the day, you attach it to a reliable existing behavior: after I pour coffee, I will review the day's priority; after I brush my teeth, I will stretch; after I close my laptop, I will reset my desk. The existing habit becomes the cue for the new one.",
+      "Environment design is the physical version of the same principle. Put the book where reading should happen. Put the running shoes by the door. Put the guitar on a stand instead of in a case. Remove or hide cues that pull the opposite direction. The environment should remember the habit before you have to.",
+      "The nuance is that obvious does not mean noisy. A dozen reminders become clutter. A good cue is placed in the context where the behavior can begin. The mat beside the bed works better than a generic phone notification because the cue is where the action happens."
+    ],
+    support: [
+      {
+        type: "framework",
+        title: "Make it obvious toolkit",
+        stages: [
+          {
+            name: "Scorecard",
+            description:
+              "Make current routines visible before choosing what to change."
+          },
+          {
+            name: "Intention",
+            description:
+              "Specify when and where the behavior will happen."
+          },
+          {
+            name: "Stack",
+            description:
+              "Attach the new behavior to an existing reliable anchor."
+          },
+          {
+            name: "Environment",
+            description:
+              "Place the cue where the behavior should begin and remove competing cues."
+          }
+        ]
+      },
+      {
+        type: "expandedExample",
+        scenario: "Redesigning a morning routine for reading and planning.",
+        defaultApproach:
+          "Wake up, check the phone, react to messages, and hope to read later.",
+        betterApproach:
+          "Charge the phone outside the bedroom, place the book beside coffee, and stack planning after the first cup: after I pour coffee, I read ten pages and write the day's top priority.",
+        whyItWorks:
+          "The desired actions become visible before reactive cues take control of the morning."
+      },
+      {
+        type: "misconception",
         misconception: "If a habit matters, I should remember it.",
         correction:
-          "Important habits deserve designed cues precisely because attention is limited."
+          "Important habits deserve designed cues because attention is limited and the day is crowded.",
+        whyItMatters:
+          "This shifts the solution from self-blame to cue design."
+      },
+      {
+        type: "exercise",
+        title: "Design one obvious cue",
+        instructions:
+          "Choose one habit and give it a specific time, place, anchor, and visible cue.",
+        prompts: [
+          "When and where will this happen?",
+          "What existing habit can it follow?",
+          "What object or signal should be visible in that location?"
+        ]
       }
     ],
-    retentionAnchors: [
-      "Obvious cues reduce the need to remember.",
-      "Put the cue where the behavior begins."
+    whyThisMatters:
+      "Many good habits fail because they are invisible until the opportunity has already passed.",
+    practicalApplication:
+      "Create one implementation intention, attach it to an existing routine, and place a physical cue in the exact context where the habit should begin.",
+    commonMistakes: [
+      "Using vague reminders instead of contextual cues",
+      "Choosing an anchor that is not actually reliable",
+      "Adding good-habit cues while leaving stronger bad-habit cues unchanged"
     ],
-    takeaways: [
-      "Visibility precedes repetition.",
-      "Specific cues beat vague intentions.",
+    misconceptions: [
+      {
+        misconception: "Cue design is just reminder management.",
+        correction:
+          "Cue design is attention architecture: arranging the environment so the right behavior comes to mind at the right time."
+      }
+    ],
+    reflection:
+      "Which useful behavior is currently invisible in the moment when it should happen?",
+    exercises: [
+      "Create a habit scorecard for one hour of your day.",
+      "Write one implementation intention.",
+      "Place one physical cue where the behavior starts."
+    ],
+    anchors: [
+      "Make the cue visible where the behavior begins.",
       "The environment can remember for you."
     ],
-    relatedSections: ["habit-scorecards-awareness", "environment-design"]
-  },
-  {
-    id: "habit-scorecards-awareness",
-    title: "Habit Scorecards and Awareness",
-    eyebrow: "Awareness",
-    minutes: 10,
-    summary:
-      "Before redesigning behavior, make your current habits visible enough to evaluate without drama.",
-    objectives: [
-      "Inventory current habits",
-      "Separate observation from judgment",
-      "Identify high-leverage behaviors to redesign first"
-    ],
-    concepts: ["habit scorecard", "awareness", "behavior audit"],
-    thesis:
-      "A habit scorecard turns the invisible routine of a day into inspectable data. You list recurring behaviors and mark whether each one helps, hurts, or is neutral relative to the person you want to become. The point is clarity, not self-criticism.",
-    nuance:
-      "Awareness can become counterproductive if it turns into a courtroom. The scorecard is a map. A map helps you move; it does not need to shame you for where you are standing.",
-    mentalModel: {
-      name: "Behavior inventory",
-      explanation:
-        "You cannot redesign a system you have not made visible.",
-      useWhen:
-        "Use this before adding new habits or when your day feels reactive."
-    },
-    scenario:
-      "A person wants better evenings but has never mapped the sequence from finishing work to going to sleep.",
-    defaultApproach:
-      "Decide to have more discipline at night.",
-    betterApproach:
-      "List the evening sequence, identify the cue that starts scrolling, and redesign that point in the chain.",
-    whyItWorks:
-      "The intervention targets the actual routine instead of an abstract desire to improve.",
-    applicationContext: "How to run an evening habit audit",
-    applicationSteps: [
-      "Write every repeated action in a specific time window",
-      "Mark each as positive, neutral, or negative",
-      "Identify the first behavior that sends the routine off track",
-      "Choose one cue or friction point to redesign",
-      "Review after three evenings"
-    ],
-    applicationResult:
-      "The day becomes a sequence you can edit rather than a blur you endure.",
-    exerciseTitle: "Create a one-hour scorecard",
-    exerciseInstructions:
-      "Audit one recurring hour of your day instead of trying to map everything.",
-    exercisePrompts: [
-      "What behavior starts the hour?",
-      "Which action is neutral but acts as a bridge to something negative?",
-      "Where would one small redesign have the most leverage?"
-    ],
-    reflection:
-      "What part of your day do you understand least because you have never written it down?",
-    whyThisMatters:
-      "Change accelerates when you stop guessing where the behavior begins.",
-    practicalApplication:
-      "Use a scorecard before choosing new habits so you can improve the current operating system first.",
-    commonMistakes: [
-      "Auditing too much at once",
-      "Judging behaviors before understanding their function",
-      "Trying to fix every negative mark immediately"
-    ],
-    misconceptions: [
-      {
-        misconception: "Awareness alone changes habits.",
-        correction:
-          "Awareness creates the map; design changes the route."
-      }
-    ],
-    retentionAnchors: [
-      "Make the routine visible before trying to improve it.",
-      "Audit with curiosity, then redesign with precision."
-    ],
     takeaways: [
-      "Scorecards reveal hidden loops.",
-      "Observation should precede judgment.",
-      "One leverage point can change an entire routine."
+      "Obvious cues reduce dependence on memory.",
+      "Implementation intentions make vague goals executable.",
+      "Habit stacking gives new behaviors a place in the day."
     ],
-    relatedSections: ["first-law-obvious", "advanced-habit-design"]
-  },
-  {
-    id: "implementation-intentions",
-    title: "Implementation Intentions",
-    eyebrow: "Specificity",
-    minutes: 10,
+    examples: [
+      "Put a book on the chair where you drink coffee.",
+      "After closing your laptop, reset the desk for tomorrow.",
+      "After sitting on the train, open the saved curriculum lesson."
+    ],
+    relatedSections: ["habit-loop", "make-it-easy"]
+  }),
+  chapter({
+    id: "make-it-attractive",
+    title: "Make It Attractive",
+    eyebrow: "Second Law",
+    minutes: 31,
     summary:
-      "A habit becomes more likely when you define exactly when and where the behavior will happen.",
-    objectives: [
-      "Turn vague intentions into executable commitments",
-      "Use time and place to reduce decision friction",
-      "Spot intentions that are too ambiguous to guide behavior"
-    ],
-    concepts: ["when", "where", "implementation intention"],
-    thesis:
-      "Implementation intentions work because they remove ambiguity at the moment of action. I will exercise more leaves every detail undecided. I will walk for ten minutes after lunch at the office park gives the behavior a time, place, and starting line.",
-    nuance:
-      "Specificity should make the behavior easier, not brittle. If your context changes often, define a backup version. A rigid plan that collapses whenever the day changes is not a system; it is a wish with a calendar attached.",
-    mentalModel: {
-      name: "Decision prepayment",
-      explanation:
-        "Deciding when and where in advance pays the decision cost before energy is low.",
-      useWhen:
-        "Use this when you intend to act but repeatedly postpone because the start point is vague."
-    },
-    scenario:
-      "A learner wants to review notes but keeps waiting for a good time.",
-    defaultApproach:
-      "Plan to review sometime this week.",
-    betterApproach:
-      "Review notes for fifteen minutes at 8:15 p.m. at the kitchen table on Tuesday and Thursday.",
-    whyItWorks:
-      "The behavior has a clear appointment and a defined environment.",
-    applicationContext: "How to schedule study without making it feel enormous",
-    applicationSteps: [
-      "Choose a small study behavior",
-      "Assign a precise day and time",
-      "Assign a location",
-      "Prepare materials before the appointment",
-      "Create a backup slot for disruptions"
-    ],
-    applicationResult:
-      "Study becomes a scheduled action rather than an unresolved intention.",
-    exerciseTitle: "Write the when-where sentence",
-    exerciseInstructions:
-      "Write one implementation intention for a habit you have been leaving vague.",
-    exercisePrompts: [
-      "I will do what?",
-      "On what day and at what time?",
-      "In what location?"
-    ],
-    reflection:
-      "Which intention in your life is still too vague to execute?",
-    whyThisMatters:
-      "Ambiguity lets the day decide for you.",
-    practicalApplication:
-      "Use implementation intentions for habits that require a clear appointment: study, exercise, planning, calls, writing, and reviews.",
-    commonMistakes: [
-      "Writing a motivational sentence instead of a logistical one",
-      "Choosing a time that regularly gets interrupted",
-      "Forgetting to prepare the environment before the moment arrives"
-    ],
-    misconceptions: [
-      {
-        misconception: "Planning is procrastination.",
-        correction:
-          "Precise planning is useful when it reduces the number of decisions required to begin."
-      }
-    ],
-    retentionAnchors: [
-      "Vague habits wait. Specific habits start.",
-      "When and where are behavior infrastructure."
-    ],
-    takeaways: [
-      "Specificity reduces decision friction.",
-      "A backup plan protects continuity.",
-      "A habit needs a starting line."
-    ],
-    relatedSections: ["habit-stacking", "third-law-easy"]
-  },
-  {
-    id: "habit-stacking",
-    title: "Habit Stacking",
-    eyebrow: "Sequencing",
-    minutes: 11,
-    summary:
-      "Attach a new behavior to an existing reliable behavior so the old routine becomes the cue for the new one.",
-    objectives: [
-      "Choose stable anchors",
-      "Build habit chains without overloading them",
-      "Use stacking for deep work, learning, and recovery"
-    ],
-    concepts: ["anchor habits", "sequence design", "behavior chaining"],
-    thesis:
-      "Habit stacking borrows reliability from a behavior that already happens. Instead of asking a new habit to float in the day, you attach it to a routine with an established cue. The formula is simple: after I do this current habit, I will do that new habit.",
-    nuance:
-      "The anchor must be specific and stable. After work is often too broad because work may end in different moods, locations, and times. After I place my laptop on the desk is stronger because it marks a concrete transition.",
-    mentalModel: {
-      name: "Behavior docking",
-      explanation:
-        "A new habit docks onto an existing routine until it gains its own momentum.",
-      useWhen:
-        "Use this when a behavior is useful but keeps failing to find a place in the day."
-    },
-    scenario:
-      "A knowledge worker wants a deep work ritual but opens messages immediately after sitting down.",
-    defaultApproach:
-      "Hope to feel focused after checking messages quickly.",
-    betterApproach:
-      "After opening the laptop, start a 45-minute focus timer before opening communication tools.",
-    whyItWorks:
-      "The first action after the anchor decides the direction of the work block.",
-    applicationContext: "How to use habit stacking for deep work",
-    applicationSteps: [
-      "Identify the transition that begins the work session",
-      "Choose one small focus-preparation behavior",
-      "Place it immediately after the transition",
-      "Block the competing default for the first interval",
-      "End with a reset cue for the next session"
-    ],
-    applicationResult:
-      "Deep work starts from a designed sequence rather than a battle with inbox gravity.",
-    exerciseTitle: "Build a two-link stack",
-    exerciseInstructions:
-      "Choose one existing anchor and attach one new behavior immediately after it.",
-    exercisePrompts: [
-      "What anchor already happens reliably?",
-      "What new behavior should follow it?",
-      "What competing behavior must be delayed?"
-    ],
-    reflection:
-      "Which existing routine could carry a new habit if you used it as an anchor?",
-    whyThisMatters:
-      "New habits fail when they have no home in the day.",
-    practicalApplication:
-      "Use stacks for behaviors that are short, repeatable, and naturally adjacent to an existing routine.",
-    commonMistakes: [
-      "Choosing an anchor that is not reliable",
-      "Adding too many new behaviors to one stack",
-      "Attaching a large behavior before it has a small version"
-    ],
-    misconceptions: [
-      {
-        misconception: "Habit stacking means building elaborate routines.",
-        correction:
-          "It works best as a simple link between one stable anchor and one useful action."
-      }
-    ],
-    retentionAnchors: [
-      "After current habit, do new habit.",
-      "A habit needs a place to land."
-    ],
-    takeaways: [
-      "Reliable anchors make new behaviors easier to remember.",
-      "Stacks should be small at first.",
-      "Transitions are powerful cue points."
-    ],
-    relatedSections: ["implementation-intentions", "environment-design"]
-  },
-  {
-    id: "environment-design",
-    title: "Environment Design",
-    eyebrow: "Environment",
-    minutes: 14,
-    summary:
-      "The environment is a behavior-shaping system: it decides what is visible, easy, normal, and tempting.",
-    objectives: [
-      "Understand why environment can beat willpower",
-      "Use visibility and friction to guide behavior",
-      "Apply environment design across home, work, phone, kitchen, gym, and learning contexts"
-    ],
-    concepts: ["choice architecture", "cue visibility", "friction assignment"],
-    thesis:
-      "Environment design works because people do not make decisions in a vacuum. Rooms, devices, defaults, shelves, calendars, and social spaces quietly suggest the next action. If the desired behavior is hidden and the undesired behavior is visible, discipline must fight every day.",
-    nuance:
-      "The goal is not to create a perfect minimalist life. It is to assign friction intentionally. Reduce friction for behaviors you want. Add friction to behaviors that exploit impulse. Good design makes the right thing easier before motivation is tested.",
-    mentalModel: {
-      name: "Default gravity",
-      explanation:
-        "The easiest visible action in a context has gravitational pull.",
-      useWhen:
-        "Use this when you keep blaming willpower while leaving cues and defaults unchanged."
-    },
-    scenario:
-      "A person wants to stop late-night scrolling but keeps the phone beside the bed.",
-    defaultApproach:
-      "Promise not to scroll after 10 p.m.",
-    betterApproach:
-      "Charge the phone outside the bedroom, put a book on the nightstand, and use a separate alarm clock.",
-    whyItWorks:
-      "The unwanted cue is removed, friction is added to the bad habit, and a replacement behavior becomes visible.",
-    applicationContext: "How to redesign your environment for better health and learning",
-    applicationSteps: [
-      "Identify the room or device where the habit happens",
-      "Remove or hide the strongest bad-habit cue",
-      "Place the good-habit cue where action should begin",
-      "Prepare the first step in advance",
-      "Make the undesired behavior require additional steps"
-    ],
-    applicationResult:
-      "Behavior changes because the context stops pushing against the intention.",
-    exerciseTitle: "Run an environment audit",
-    exerciseInstructions:
-      "Audit one environment through visibility, reach, preparation, and friction.",
-    exercisePrompts: [
-      "What does this environment make obvious?",
-      "What does it make easy?",
-      "What should be removed, prepared, or moved?"
-    ],
-    reflection:
-      "Where are you relying on discipline while leaving the same cues in place?",
-    whyThisMatters:
-      "Willpower is expensive; environment design makes good behavior cheaper.",
-    practicalApplication:
-      "Redesign one context at a time: desk for focus, kitchen for nutrition, phone for attention, gym bag for exercise, reading chair for study.",
-    commonMistakes: [
-      "Changing intentions while leaving cues unchanged",
-      "Making good habits visible but still inconvenient",
-      "Designing for ideal energy instead of tired evenings"
-    ],
-    misconceptions: [
-      {
-        misconception: "Environment design is just tidying up.",
-        correction:
-          "It is behavioral architecture: arranging cues, defaults, and friction to shape action."
-      }
-    ],
-    retentionAnchors: [
-      "The room often decides before you feel you decided.",
-      "Assign friction on purpose."
-    ],
-    takeaways: [
-      "Visibility drives repetition.",
-      "Friction should be designed, not accidental.",
-      "Good environments reduce self-negotiation."
-    ],
-    relatedSections: ["first-law-obvious", "friction-convenience"]
-  },
-  {
-    id: "second-law-attractive",
-    title: "The Second Law: Make It Attractive",
-    eyebrow: "Law 2",
-    minutes: 11,
-    summary:
-      "Habits become easier to repeat when the brain expects them to be rewarding, meaningful, socially valued, or emotionally relieving.",
+      "The second law is about desire: make good habits more appealing and reduce the pull of habits that create long-term costs.",
     objectives: [
       "Understand attraction as anticipated reward",
-      "Increase the appeal of useful habits ethically",
-      "Reduce the appeal of habits that create downstream costs"
+      "Use dopamine, pairing, and social norms without cheapening the habit",
+      "Make useful behaviors emotionally easier to approach"
     ],
-    concepts: ["attraction", "anticipation", "motivational pull"],
-    thesis:
-      "Attraction is not decoration. Before action happens, the brain predicts whether the behavior will feel worth doing. A habit with no felt reward must be carried by discipline. A habit that promises relief, identity, beauty, belonging, or progress has its own pull.",
-    nuance:
-      "Making a habit attractive should not corrupt the habit. If the reward overwhelms the behavior, the person learns to chase the reward rather than value the practice. The best rewards reinforce the identity and experience of the habit itself.",
-    mentalModel: {
-      name: "Anticipated value",
-      explanation:
-        "The brain moves toward behaviors it expects to change its state in a desirable way.",
-      useWhen:
-        "Use this when a useful habit is clear and easy but still emotionally unappealing."
-    },
-    scenario:
-      "A student avoids study sessions because they feel dry and punishing.",
-    defaultApproach:
-      "Force longer study blocks and treat discomfort as proof of seriousness.",
-    betterApproach:
-      "Create a calm study ritual, use a beautiful notebook, study with a focused friend, and end each session with visible progress.",
-    whyItWorks:
-      "The session gains immediate emotional rewards without replacing the learning itself.",
-    applicationContext: "How to make a reading or study habit more attractive",
-    applicationSteps: [
-      "Identify why the habit feels aversive",
-      "Pair it with a pleasant but non-distracting ritual",
-      "Make progress visible",
-      "Connect the behavior to an identity you respect",
-      "Remove cues that make the alternative more attractive"
+    concepts: ["anticipation", "temptation bundling", "social norms", "desire"],
+    body: [
+      "A behavior becomes easier to repeat when the brain expects it to be rewarding. This is the heart of the second law. The reward does not have to be dramatic. It might be relief, beauty, progress, belonging, control, or identity proof. But some form of attraction needs to be present, especially when the long-term benefit is delayed.",
+      "Desire often begins before the behavior. A cue predicts a reward, and the anticipation of that reward creates pull. This is why the sight of a phone can create the urge to check it, why a notification can feel magnetic, and why a prepared reading chair can invite study. The cue has learned to promise a state change.",
+      "Good habit design can use this mechanism. A study ritual can become more attractive when paired with a calm space, a good pen, a visible progress log, or a respected community of learners. Exercise can become more attractive when the first reward is immediate relief rather than a distant body transformation. Saving money can become more attractive when each transfer is framed as buying future options rather than losing present pleasure.",
+      "Temptation bundling is one practical tool: pair a needed behavior with something you already enjoy. Listen to a favorite podcast only while walking. Drink a favorite tea only while doing weekly planning. The pairing works best when the reward supports the habit rather than stealing attention from it. A podcast can pair with walking; it usually pairs poorly with deep reading.",
+      "Social environment also shapes attraction. People imitate what is normal, admired, and rewarded in groups they care about. If your peers treat deep study as strange, it will feel harder to sustain. If you spend time around people who take ideas seriously, careful reading becomes socially reinforced. The same is true for money, health, work, and relationships.",
+      "The nuance is that attractiveness should not become entertainment at all costs. The goal is not to make every useful behavior constantly pleasurable. The goal is to make the behavior approachable enough to repeat while preserving its integrity. Serious habits can be satisfying without becoming shallow."
     ],
-    applicationResult:
-      "The habit becomes something the user can approach instead of merely endure.",
-    exerciseTitle: "Design the attractive edge",
-    exerciseInstructions:
-      "Add one legitimate source of appeal to a habit without undermining the behavior.",
-    exercisePrompts: [
-      "What would make the habit feel more inviting?",
-      "What reward would support rather than distract from the habit?",
-      "What competing habit currently feels more attractive?"
+    support: [
+      {
+        type: "callout",
+        title: "Attraction principle",
+        text: "The brain moves toward behaviors it expects will create a desirable state change."
+      },
+      {
+        type: "expandedExample",
+        scenario: "Building a reading habit that feels inviting rather than punitive.",
+        defaultApproach:
+          "Treat reading as a duty and force long sessions in a distracting room.",
+        betterApproach:
+          "Create a quiet reading ritual, keep notes visible, join a serious reading group, and end each session by capturing one idea worth using.",
+        whyItWorks:
+          "The habit gains emotional appeal through environment, identity, social reinforcement, and immediate progress."
+      },
+      {
+        type: "keyDistinction",
+        title: "Attractive is not the same as entertaining",
+        not: "Turning every good habit into a dopamine-maximized distraction.",
+        but: "Adding enough immediate meaning, progress, or satisfaction that the habit becomes easier to approach."
+      },
+      {
+        type: "exercise",
+        title: "Add legitimate attraction",
+        instructions:
+          "Choose a useful habit you avoid and add one source of appeal that does not undermine it.",
+        prompts: [
+          "What makes the habit feel aversive right now?",
+          "What reward would support the habit rather than distract from it?",
+          "What social or environmental cue could make the behavior feel more normal?"
+        ]
+      }
     ],
-    reflection:
-      "Which useful habit do you resist because it has no immediate emotional reward?",
     whyThisMatters:
-      "People repeat behaviors that feel rewarding soon, even when they care about distant outcomes.",
+      "Useful habits often have delayed rewards, so they need near-term emotional support if they are going to survive ordinary resistance.",
     practicalApplication:
-      "Pair useful habits with appealing contexts, social support, immediate feedback, and identity proof.",
+      "Pair a useful behavior with an aligned reward, make progress visible, and increase exposure to people or environments where the desired behavior is normal.",
     commonMistakes: [
-      "Trying to force habits that feel punishing forever",
-      "Using rewards that distract from the habit",
-      "Ignoring the attractiveness of the bad habit"
+      "Assuming serious habits should feel punishing",
+      "Choosing rewards that distract from or contradict the habit",
+      "Ignoring social environments that make the bad habit more attractive"
     ],
     misconceptions: [
       {
-        misconception: "A serious habit should not need to feel good.",
+        misconception: "If I make a habit attractive, I am making it less serious.",
         correction:
-          "A habit can be serious and still be designed to feel satisfying, meaningful, or inviting."
+          "A serious habit can be designed to feel meaningful, satisfying, and worth returning to."
       }
-    ],
-    retentionAnchors: [
-      "The brain moves toward expected reward.",
-      "Make the habit worth approaching."
-    ],
-    takeaways: [
-      "Attraction increases repetition.",
-      "Good rewards reinforce the behavior.",
-      "Unattractive habits need design, not moralizing."
-    ],
-    relatedSections: ["dopamine-anticipation-desire", "temptation-bundling"]
-  },
-  {
-    id: "dopamine-anticipation-desire",
-    title: "Dopamine, Anticipation, and Desire",
-    eyebrow: "Desire",
-    minutes: 12,
-    summary:
-      "Desire is often driven by the anticipation of reward, which means cues can create motivation before the reward arrives.",
-    objectives: [
-      "Explain anticipation as a driver of habits",
-      "Use cues to create healthy desire",
-      "Understand why tempting habits pull attention so strongly"
-    ],
-    concepts: ["anticipation", "reward prediction", "desire"],
-    thesis:
-      "The brain does not wait for the reward to become motivated. Once it learns that a cue predicts a rewarding state, anticipation itself becomes energizing. This is why the sight of a phone, snack, inbox, or gym bag can change desire before action begins.",
-    nuance:
-      "Dopamine is often discussed too casually. The practical point for habit design is simpler: anticipated rewards shape behavior. If a bad habit has vivid anticipation and a good habit has none, the bad habit has the motivational advantage.",
-    mentalModel: {
-      name: "Prediction pull",
-      explanation:
-        "Cues gain power when the brain predicts they will lead to a desirable state change.",
-      useWhen:
-        "Use this when a cue seems to trigger desire instantly."
-    },
-    scenario:
-      "Someone opens a food delivery app after seeing a late-night notification.",
-    defaultApproach:
-      "Blame appetite and try to resist inside the app.",
-    betterApproach:
-      "Disable notifications, pre-plan a satisfying evening snack, and make the desired routine visible before the cue appears.",
-    whyItWorks:
-      "The plan weakens the anticipation cue and gives the craving a lower-cost path.",
-    applicationContext: "How to redesign desire around attention and food cues",
-    applicationSteps: [
-      "Identify the cue that generates anticipation",
-      "Remove the cue when possible",
-      "Create a healthier cue that predicts a better reward",
-      "Make the replacement reward immediate",
-      "Review whether desire changes before the action point"
-    ],
-    applicationResult:
-      "The user stops fighting desire at maximum intensity and redesigns the prediction that created it.",
-    exerciseTitle: "Track one anticipation trigger",
-    exerciseInstructions:
-      "For three days, record the cue that creates desire before one repeated behavior.",
-    exercisePrompts: [
-      "What cue appeared?",
-      "What reward did your brain predict?",
-      "What healthier cue could predict a better reward?"
     ],
     reflection:
-      "Which cue in your environment creates desire before you consciously decide anything?",
-    whyThisMatters:
-      "Behavioral pull often begins before conscious deliberation.",
-    practicalApplication:
-      "Manage notifications, visual cues, social cues, and rituals as prediction systems.",
-    commonMistakes: [
-      "Waiting to intervene until craving is strongest",
-      "Underestimating cues that predict relief",
-      "Making good habits easy but emotionally unrewarding"
+      "Which good habit do you resist because it has no immediate emotional reward?",
+    exercises: [
+      "Create one temptation bundle for a low-cognitive habit.",
+      "Name one social environment that makes your desired habit more normal.",
+      "Remove one cue that makes the competing habit more attractive."
     ],
-    misconceptions: [
-      {
-        misconception: "Desire appears randomly.",
-        correction:
-          "Desire is often trained by cues that predict a reward or state change."
-      }
-    ],
-    retentionAnchors: [
-      "Cues create predictions. Predictions create desire.",
-      "Change the prediction before fighting the craving."
+    anchors: [
+      "Anticipation creates desire.",
+      "Make the habit worth approaching, not merely worth admiring."
     ],
     takeaways: [
-      "Anticipation motivates behavior.",
-      "Bad habits often have stronger prediction cues.",
-      "Healthy desire can be designed."
+      "Attraction is anticipated reward.",
+      "Temptation bundling works when the reward is compatible.",
+      "Social norms can make habits easier or harder to repeat."
     ],
-    relatedSections: ["second-law-attractive", "breaking-bad-habits-inversion"]
-  },
-  {
-    id: "temptation-bundling",
-    title: "Temptation Bundling",
-    eyebrow: "Pairing",
-    minutes: 9,
-    summary:
-      "Pair a needed behavior with an immediately enjoyable one so the useful action inherits motivational pull.",
-    objectives: [
-      "Understand how pairing changes motivation",
-      "Design bundles that support rather than distract",
-      "Use bundling for exercise, chores, and study"
-    ],
-    concepts: ["pairing", "immediate reward", "motivation transfer"],
-    thesis:
-      "Temptation bundling links a behavior you need to do with a behavior you want to do. The enjoyable element lends motivational energy to the useful behavior. The key is choosing a pairing that does not sabotage the task.",
-    nuance:
-      "Not every bundle is wise. If the tempting activity consumes attention needed for the habit, the bundle degrades the behavior. Podcasts can pair well with walking; they pair poorly with deep reading.",
-    mentalModel: {
-      name: "Borrowed attraction",
-      explanation:
-        "A low-attraction habit can borrow appeal from a compatible reward.",
-      useWhen:
-        "Use this when the habit is simple enough to pair without losing quality."
-    },
-    scenario:
-      "Someone wants to walk more but finds walking alone boring.",
-    defaultApproach:
-      "Wait until walking feels intrinsically exciting.",
-    betterApproach:
+    examples: [
       "Listen to a favorite interview only while walking.",
-    whyItWorks:
-      "The person wants the paired reward, and the walk becomes the access path.",
-    applicationContext: "How to bundle a health habit",
-    applicationSteps: [
-      "Choose a low-cognitive habit",
-      "Choose an enjoyable reward compatible with it",
-      "Restrict the reward to the habit context",
-      "Keep the habit short enough to start",
-      "Remove the bundle if it lowers habit quality"
+      "Study in a room that feels calm and intentional.",
+      "Join a group where saving, training, reading, or deep work is normal."
     ],
-    applicationResult:
-      "A useful behavior gains immediate appeal without waiting for distant benefits.",
-    exerciseTitle: "Create one compatible bundle",
-    exerciseInstructions:
-      "Pair one needed behavior with one enjoyable behavior that will not compete for the same attention.",
-    exercisePrompts: [
-      "What habit needs more pull?",
-      "What reward is compatible?",
-      "How will you prevent the reward from escaping the bundle?"
-    ],
-    reflection:
-      "Which habit could borrow appeal from a reward without losing its quality?",
-    whyThisMatters:
-      "Long-term benefits often need short-term support.",
-    practicalApplication:
-      "Use bundles for walking, cleaning, mobility work, meal prep, and other low-cognitive behaviors.",
-    commonMistakes: [
-      "Pairing deep work with distracting rewards",
-      "Letting the reward happen without the habit",
-      "Choosing a reward that makes the habit harder"
-    ],
-    misconceptions: [
-      {
-        misconception: "Bundling is cheating.",
-        correction:
-          "It is design: pairing immediate reward with useful action so the behavior survives."
-      }
-    ],
-    retentionAnchors: [
-      "Borrow attraction only when the reward does not steal attention.",
-      "The reward should support the behavior, not replace it."
-    ],
-    takeaways: [
-      "Pairing can make useful behaviors more repeatable.",
-      "Compatibility matters.",
-      "Restrict the reward to preserve the bundle."
-    ],
-    relatedSections: ["second-law-attractive"]
-  },
-  {
-    id: "social-environment-imitation",
-    title: "Social Environment and Imitation",
-    eyebrow: "Culture",
-    minutes: 11,
+    relatedSections: ["habit-loop", "make-it-satisfying"]
+  }),
+  chapter({
+    id: "make-it-easy",
+    title: "Make It Easy",
+    eyebrow: "Third Law",
+    minutes: 34,
     summary:
-      "People imitate behaviors that are normal, admired, and rewarded in their social environment.",
+      "The third law is about friction: reduce the activation cost of good habits and increase the cost of bad ones.",
     objectives: [
-      "Understand social proof as habit pressure",
-      "Choose groups that normalize desired behaviors",
-      "Use social identity without surrendering judgment"
+      "Understand why ease predicts repetition",
+      "Use friction and convenience intentionally",
+      "Apply the two-minute rule without trivializing serious goals"
     ],
-    concepts: ["social proof", "norms", "belonging"],
-    thesis:
-      "Habits are not purely private. We copy the close, the many, and the powerful. A behavior becomes more attractive when it is a path to belonging or status in a group we care about.",
-    nuance:
-      "Social influence can raise or lower standards. The point is not to outsource identity to a group; it is to choose environments where the behavior you want is ordinary and respected.",
-    mentalModel: {
-      name: "Norm gravity",
-      explanation:
-        "What is normal in your group becomes easier to repeat because belonging rewards conformity.",
-      useWhen:
-        "Use this when a habit feels lonely or when your environment normalizes the opposite behavior."
-    },
-    scenario:
-      "A new investor is surrounded by friends who treat speculation as entertainment.",
-    defaultApproach:
-      "Try to be disciplined while absorbing speculative norms every day.",
-    betterApproach:
-      "Join a community that values long horizons, savings rate, risk management, and process over excitement.",
-    whyItWorks:
-      "The desired behavior becomes socially reinforced instead of socially isolated.",
-    applicationContext: "How to use social environment for money habits",
-    applicationSteps: [
-      "Identify the behavior your current group normalizes",
-      "Find one group where your desired behavior is ordinary",
-      "Increase exposure to that group's practices",
-      "Reduce exposure to norms that pull against your system",
-      "Keep your own standards explicit"
+    concepts: ["friction", "convenience", "two-minute rule", "activation energy"],
+    body: [
+      "The third law is where habit design becomes especially practical. People often assume a habit fails because they lack motivation. Sometimes that is true. More often, the behavior is simply too hard to start under real conditions. The tools are in another room. The document is not open. The workout requires too much setup. The healthy meal is less convenient than the delivery app.",
+      "Friction is any step, delay, decision, search, setup, or emotional cost between cue and response. The more friction a behavior has, the less likely it is to happen when energy is low. This is not weakness; it is how behavior works. Convenience is behavioral power.",
+      "The solution is to make the desired action the path of least resistance. Prepare the gym bag before the morning. Open the writing document before ending work. Put the healthy food at eye level. Remove saved cards from shopping sites. Keep the guitar on a stand. The point is not to eliminate effort from life, but to spend effort where it matters instead of wasting it at the starting line.",
+      "The two-minute rule fits here. Scale a new habit down until the entry point takes roughly two minutes: read one page, put on running shoes, open the draft, sit on the meditation cushion. This can sound unserious until you understand its purpose. The two-minute habit is not the final ambition. It is the doorway. You are training the start.",
+      "Once starting becomes reliable, the habit can grow. But many people try to scale before the entry behavior is stable. They design the heroic version first and then wonder why it collapses. A serious habit often needs an easy entrance precisely because the larger behavior matters.",
+      "Ease also applies to breaking bad habits, but in reverse. Add friction before the vulnerable moment. Charge the phone outside the bedroom. Log out of tempting apps. Keep snack foods inconvenient. Add a waiting period before purchases. Friction creates space for intention to return."
     ],
-    applicationResult:
-      "The habit gains social support and identity reinforcement.",
-    exerciseTitle: "Audit norm exposure",
-    exerciseInstructions:
-      "List the groups, feeds, and people that make a behavior feel normal.",
-    exercisePrompts: [
-      "Who makes your desired habit feel normal?",
-      "Who makes the opposite behavior feel normal?",
-      "What social input should you increase or reduce?"
+    support: [
+      {
+        type: "comparisonTable",
+        title: "Friction design",
+        columns: ["Behavior", "Reduce friction", "Add friction"],
+        rows: [
+          ["Reading", "Place book where the routine starts", "Keep phone outside the room"],
+          ["Exercise", "Pack clothes the night before", "Remove easy excuses by scheduling with a friend"],
+          ["Spending", "Automate saving first", "Remove saved cards and add a waiting period"],
+          ["Deep work", "Open the document in advance", "Block communication tools for the first interval"]
+        ]
+      },
+      {
+        type: "expandedExample",
+        scenario: "Starting a writing habit when the blank page feels heavy.",
+        defaultApproach:
+          "Schedule a three-hour writing session and avoid it because the emotional cost is high.",
+        betterApproach:
+          "Open the draft at the end of the previous day and begin tomorrow by writing one rough sentence.",
+        whyItWorks:
+          "The entry point is small enough to begin, and once motion starts, continuation becomes more likely."
+      },
+      {
+        type: "exercise",
+        title: "Redesign the first two minutes",
+        instructions:
+          "Choose one avoided habit and make only the beginning easier.",
+        prompts: [
+          "What is the true first action?",
+          "What setup can happen before the habit window?",
+          "What bad habit needs added friction before the vulnerable moment?"
+        ]
+      }
     ],
-    reflection:
-      "Which group is quietly teaching you what is normal?",
     whyThisMatters:
-      "Belonging is one of the strongest rewards a behavior can have.",
+      "Many valuable behaviors die before they begin because the first step is too expensive under ordinary conditions.",
     practicalApplication:
-      "Shape your social inputs: peers, mentors, feeds, communities, offices, and family routines.",
+      "Prepare the environment in advance, shrink the entry point, remove setup decisions, and add friction to competing behaviors.",
     commonMistakes: [
-      "Trying to sustain a habit in a group that mocks it",
-      "Confusing popularity with wisdom",
-      "Using social identity to avoid independent thought"
+      "Designing the heroic version before the repeatable version",
+      "Calling an easy start unserious",
+      "Adding friction after the bad habit has already begun"
     ],
     misconceptions: [
       {
-        misconception: "Habits are purely individual discipline.",
+        misconception: "Easy habits are low standards.",
         correction:
-          "Many habits are socially reinforced by norms, status, and belonging."
+          "Easy starts are entry points. They help serious behaviors happen consistently enough to grow."
       }
-    ],
-    retentionAnchors: [
-      "The group teaches the behavior.",
-      "Choose where your desired habit is normal."
-    ],
-    takeaways: [
-      "Social norms shape repetition.",
-      "Belonging can reinforce good or bad habits.",
-      "Curate the environments that define normal."
-    ],
-    relatedSections: ["second-law-attractive", "relationships-application"]
-  },
-  {
-    id: "third-law-easy",
-    title: "The Third Law: Make It Easy",
-    eyebrow: "Law 3",
-    minutes: 12,
-    summary:
-      "A habit is more likely when the first action is simple, close, prepared, and low-friction.",
-    objectives: [
-      "Explain why ease predicts repetition",
-      "Reduce activation energy for desired habits",
-      "Design the first step instead of only the full behavior"
-    ],
-    concepts: ["activation energy", "ease", "first action"],
-    thesis:
-      "The third law shifts attention from intention to friction. People often assume they need more motivation when what they actually need is a smaller first step, a prepared environment, and fewer obstacles between cue and response.",
-    nuance:
-      "Easy does not mean unambitious. It means the entry point is designed. Serious behavior often starts with an unthreatening opening move that makes continuation more likely.",
-    mentalModel: {
-      name: "Activation ramp",
-      explanation:
-        "The easier the first step, the more likely motion begins; once motion begins, continuation becomes easier.",
-      useWhen:
-        "Use this when a habit feels too large to start even though you value it."
-    },
-    scenario:
-      "A person wants to write essays but avoids the blank page.",
-    defaultApproach:
-      "Schedule a three-hour writing session and dread it.",
-    betterApproach:
-      "Open the draft every morning and write one rough sentence before deciding whether to continue.",
-    whyItWorks:
-      "The first step is small enough to bypass resistance and creates momentum toward deeper work.",
-    applicationContext: "How to make creative work easier to start",
-    applicationSteps: [
-      "Prepare the document before the session",
-      "Define a tiny first action",
-      "Remove setup decisions",
-      "Start with a timer short enough to feel safe",
-      "Continue only after the entry behavior is complete"
-    ],
-    applicationResult:
-      "Starting becomes reliable, which gives serious work more chances to happen.",
-    exerciseTitle: "Reduce the entry cost",
-    exerciseInstructions:
-      "Pick one avoided habit and redesign only the first sixty seconds.",
-    exercisePrompts: [
-      "What is the true first action?",
-      "What setup can happen earlier?",
-      "How can the first minute become easier?"
     ],
     reflection:
-      "Which habit would improve if you designed the first minute instead of the full session?",
-    whyThisMatters:
-      "Many valuable behaviors die at the starting line.",
-    practicalApplication:
-      "Prepare tools, reduce choices, shrink the first step, and make the desired action the path of least resistance.",
-    commonMistakes: [
-      "Designing the heroic version first",
-      "Confusing ease with lack of ambition",
-      "Leaving setup work inside the habit window"
+      "Which habit would change if you designed the first two minutes instead of the full ideal session?",
+    exercises: [
+      "Define the two-minute version of one habit.",
+      "Prepare one tool or environment before the habit window.",
+      "Add one unit of friction to a competing behavior."
     ],
-    misconceptions: [
-      {
-        misconception: "If the first step is easy, the habit is not serious.",
-        correction:
-          "A serious habit often needs an easy entrance so it can happen consistently."
-      }
-    ],
-    retentionAnchors: [
+    anchors: [
       "Make the start easy enough to repeat.",
-      "Ambition can grow after motion begins."
-    ],
-    takeaways: [
-      "Ease increases repetition.",
-      "The first step deserves design.",
-      "Preparation reduces activation energy."
-    ],
-    relatedSections: ["friction-convenience", "two-minute-rule"]
-  },
-  {
-    id: "friction-convenience",
-    title: "Friction, Convenience, and the Path of Least Resistance",
-    eyebrow: "Friction",
-    minutes: 12,
-    summary:
-      "Behavior follows the path of least resistance more often than people admit, so friction should be assigned deliberately.",
-    objectives: [
-      "Use friction reduction for good habits",
-      "Use friction addition for bad habits",
-      "Understand convenience as behavioral power"
-    ],
-    concepts: ["friction", "convenience", "resistance"],
-    thesis:
-      "Friction is the hidden tax on behavior. Every extra step, search, login, decision, or preparation requirement reduces the odds of action. Convenience is not morally neutral: it shapes what people repeat.",
-    nuance:
-      "The same tool can help or harm depending on where friction is placed. Autopay can protect finances; one-click buying can weaken them. Good habit design is not anti-convenience; it is pro-intentional convenience.",
-    mentalModel: {
-      name: "Friction budget",
-      explanation:
-        "Every behavior has a cost in steps, time, attention, and emotional effort. Spend friction on habits you want less of.",
-      useWhen:
-        "Use this when a bad habit is too convenient or a good habit is too cumbersome."
-    },
-    scenario:
-      "Someone wants to cook more but ingredients are unplanned and delivery takes two taps.",
-    defaultApproach:
-      "Promise to be more disciplined at dinner.",
-    betterApproach:
-      "Plan two default meals, keep ingredients visible, and remove delivery apps from the home screen.",
-    whyItWorks:
-      "Cooking becomes the lower-friction path while ordering requires more deliberate action.",
-    applicationContext: "How to redesign kitchen and phone friction",
-    applicationSteps: [
-      "List the steps in the good habit",
-      "Remove or pre-complete two steps",
-      "List the steps in the bad habit",
-      "Add two pauses or barriers",
-      "Make the better option visible at the decision point"
-    ],
-    applicationResult:
-      "The desired behavior becomes easier at the exact moment the choice is made.",
-    exerciseTitle: "Move two units of friction",
-    exerciseInstructions:
-      "Take friction away from one good habit and add it to one bad habit.",
-    exercisePrompts: [
-      "What step can be removed from the good habit?",
-      "What step can be added to the bad habit?",
-      "Where does the choice usually happen?"
-    ],
-    reflection:
-      "Which bad habit is winning mostly because it is convenient?",
-    whyThisMatters:
-      "Convenience quietly determines behavior when energy is low.",
-    practicalApplication:
-      "Use prep, defaults, app placement, saved settings, and physical distance to guide behavior.",
-    commonMistakes: [
-      "Trying to out-discipline a low-friction temptation",
-      "Making good habits noble but inconvenient",
-      "Adding friction after the craving has already peaked"
-    ],
-    misconceptions: [
-      {
-        misconception: "Friction is always bad.",
-        correction:
-          "Friction is useful when placed between impulse and harmful behavior."
-      }
-    ],
-    retentionAnchors: [
-      "Behavior follows ease.",
       "Spend friction where you want hesitation."
     ],
     takeaways: [
-      "Convenience is behavioral leverage.",
-      "Reduce friction for good habits.",
-      "Add friction before bad habits start."
+      "Ease predicts repetition.",
+      "The two-minute rule trains the start.",
+      "Friction can be removed for good habits and added to bad ones."
     ],
-    relatedSections: ["environment-design", "breaking-bad-habits-inversion"]
-  },
-  {
-    id: "two-minute-rule",
-    title: "The Two-Minute Rule",
-    eyebrow: "Entry",
-    minutes: 10,
+    examples: [
+      "Open the lesson before the study block begins.",
+      "Pack the gym bag before morning energy is tested.",
+      "Remove delivery apps from the home screen before evening hunger arrives."
+    ],
+    relatedSections: ["make-it-obvious", "breaking-bad-habits"]
+  }),
+  chapter({
+    id: "make-it-satisfying",
+    title: "Make It Satisfying",
+    eyebrow: "Fourth Law",
+    minutes: 30,
     summary:
-      "Scale a new habit down to a two-minute entry behavior so starting becomes automatic before expanding the workload.",
+      "The fourth law is about reinforcement: good habits need immediate satisfaction because many of their most important rewards arrive late.",
     objectives: [
-      "Use tiny starts without trivializing the goal",
-      "Build automaticity before intensity",
-      "Know when and how to scale a habit"
+      "Understand why immediate feedback reinforces habits",
+      "Use tracking and aligned rewards without becoming rigid",
+      "Bridge the gap between delayed outcomes and present effort"
     ],
-    concepts: ["gateway habit", "automaticity", "scaling"],
-    thesis:
-      "The two-minute rule is not about doing only two minutes forever. It is about mastering the art of showing up. Once the beginning is automatic, the habit has a foundation that can carry more volume.",
-    nuance:
-      "The two-minute version must preserve the identity of the full behavior. Reading one page counts because it is reading. Lacing running shoes counts only if it reliably leads toward the runner identity and not merely toward checking a box.",
-    mentalModel: {
-      name: "Gateway behavior",
-      explanation:
-        "The tiny habit is the doorway into the larger practice.",
-      useWhen:
-        "Use this when the full habit feels too heavy to repeat consistently."
-    },
-    scenario:
-      "A person wants to meditate for twenty minutes but keeps skipping.",
-    defaultApproach:
-      "Restart the twenty-minute plan every Monday.",
-    betterApproach:
-      "Sit on the cushion and breathe for two minutes after brushing teeth for two weeks.",
-    whyItWorks:
-      "The person practices the start until the identity and context become stable.",
-    applicationContext: "How to build a meditation or learning habit",
-    applicationSteps: [
-      "Define the full habit",
-      "Shrink it to a two-minute version",
-      "Repeat the tiny version until it feels automatic",
-      "Add volume gradually",
-      "Return to two minutes when life gets chaotic"
+    concepts: ["reinforcement", "immediate rewards", "tracking", "delayed outcomes"],
+    body: [
+      "Good habits often suffer from a timing problem. Their costs arrive now while their benefits arrive later. Exercise costs effort now; health arrives later. Studying costs attention now; expertise arrives later. Saving money costs present spending power; freedom arrives later. Bad habits often reverse the timing: the reward is immediate and the cost is delayed.",
+      "The fourth law solves part of this problem by making good habits satisfying in the present. Satisfaction does not have to mean indulgence. It can mean checking a box, seeing a streak, feeling the room reset, watching a savings chart rise, or writing one sentence that captures what you learned. The reward should reinforce the habit rather than contradict it.",
+      "Habit tracking is powerful because it makes invisible consistency visible. A mark on a calendar gives immediate feedback. A completed lesson count shows progress. A simple log turns effort into evidence. Tracking also makes patterns easier to review. You can see whether the habit is actually happening rather than relying on emotional memory.",
+      "But tracking has a shadow side. If the tracker becomes a perfection scoreboard, it can turn one miss into shame. The point is not to worship the streak. The point is to create feedback, satisfaction, and repair. A missed day is not a verdict; it is information. The useful question is what broke: cue, craving, response, reward, friction, or context?",
+      "Immediate rewards should be aligned. Rewarding a workout with behavior that undermines health may teach the wrong lesson. Rewarding a savings transfer with impulsive spending can erase the habit's meaning. Better rewards point in the same direction: visible progress, a recovery ritual, a clean reset, or a moment of identity recognition.",
+      "This law is especially important for learning. The payoff of study is often delayed, so the learner needs immediate signals: a recall question answered, an idea applied, a note connected, a concept explained. The mind needs to feel that attention produced something usable."
     ],
-    applicationResult:
-      "The habit survives because the minimum version is always available.",
-    exerciseTitle: "Design the gateway",
-    exerciseInstructions:
-      "Write the two-minute version of a habit you want to build.",
-    exercisePrompts: [
-      "What is the full habit?",
-      "What is the two-minute doorway?",
-      "When will you scale it?"
-    ],
-    reflection:
-      "What habit would you trust more if the minimum version were almost impossible to skip?",
-    whyThisMatters:
-      "Automatic starts create more long-term progress than ambitious restarts.",
-    practicalApplication:
-      "Use two-minute versions for reading, exercise, writing, cleaning, meditation, language learning, and financial review.",
-    commonMistakes: [
-      "Treating the two-minute rule as the final standard",
-      "Choosing a tiny action unrelated to the identity",
-      "Scaling before the start is reliable"
-    ],
-    misconceptions: [
+    support: [
       {
-        misconception: "Two minutes is too small to matter.",
-        correction:
-          "Two minutes matters when it trains the start and protects continuity."
+        type: "callout",
+        title: "Reward alignment",
+        text: "A good reward makes the habit feel complete without teaching the opposite behavior."
+      },
+      {
+        type: "expandedExample",
+        scenario: "Making a savings habit satisfying before wealth is visible.",
+        defaultApproach:
+          "Rely on distant financial security to motivate a behavior that feels like present deprivation.",
+        betterApproach:
+          "Automate a transfer, watch a visible freedom fund grow, and treat each deposit as proof that future options are being protected.",
+        whyItWorks:
+          "The reward becomes immediate identity evidence rather than a distant abstraction."
+      },
+      {
+        type: "exercise",
+        title: "Design an aligned reward",
+        instructions:
+          "Add immediate satisfaction to a habit without undermining the behavior.",
+        prompts: [
+          "What delayed benefit does this habit create?",
+          "What immediate signal could represent progress?",
+          "What reward would accidentally teach the wrong behavior?"
+        ]
       }
     ],
-    retentionAnchors: [
-      "First master showing up.",
-      "The doorway matters because it makes the room reachable."
-    ],
-    takeaways: [
-      "Tiny starts build reliability.",
-      "Scale after automaticity.",
-      "The minimum habit protects continuity."
-    ],
-    relatedSections: ["third-law-easy", "consistency-recovery"]
-  },
-  {
-    id: "fourth-law-satisfying",
-    title: "The Fourth Law: Make It Satisfying",
-    eyebrow: "Law 4",
-    minutes: 11,
-    summary:
-      "A habit is more likely to repeat when it produces immediate satisfaction, even if the largest benefits arrive later.",
-    objectives: [
-      "Understand why immediate feedback matters",
-      "Create rewards that reinforce good habits",
-      "Avoid rewards that conflict with the habit"
-    ],
-    concepts: ["immediate satisfaction", "reinforcement", "feedback"],
-    thesis:
-      "The brain learns from what feels rewarding now. Many good habits have delayed rewards, while many bad habits have immediate rewards and delayed costs. The fourth law closes that gap by adding immediate satisfaction to the useful behavior.",
-    nuance:
-      "Satisfaction does not need to be indulgence. It can be visual progress, identity proof, a clean environment, a brief ritual, or the relief of keeping a promise. The reward should point in the same direction as the habit.",
-    mentalModel: {
-      name: "Reward alignment",
-      explanation:
-        "A good reward makes the habit feel complete without teaching the opposite behavior.",
-      useWhen:
-        "Use this when a habit is useful but emotionally unrewarding in the short term."
-    },
-    scenario:
-      "A person saves money but feels only deprivation because the benefit is invisible.",
-    defaultApproach:
-      "Rely on distant retirement goals for motivation.",
-    betterApproach:
-      "Track each transfer on a visible freedom fund chart and celebrate the growth of options.",
-    whyItWorks:
-      "The reward makes progress tangible while reinforcing the reason for saving.",
-    applicationContext: "How to make delayed financial habits satisfying now",
-    applicationSteps: [
-      "Identify the delayed benefit",
-      "Create a visible progress signal",
-      "Pair completion with a small aligned ritual",
-      "Avoid rewards that undo the habit",
-      "Review cumulative progress regularly"
-    ],
-    applicationResult:
-      "The habit feels rewarding before the distant payoff arrives.",
-    exerciseTitle: "Design an aligned reward",
-    exerciseInstructions:
-      "Add immediate satisfaction to one good habit without undermining it.",
-    exercisePrompts: [
-      "What delayed reward does the habit create?",
-      "What immediate signal can represent progress?",
-      "What reward would conflict with the habit?"
-    ],
-    reflection:
-      "Which good habit gives you too little immediate feedback to survive?",
     whyThisMatters:
-      "Behaviors with immediate satisfaction are easier to repeat.",
+      "Behaviors that feel satisfying now are easier to repeat, especially when the largest benefits are delayed.",
     practicalApplication:
-      "Use visual trackers, completion rituals, clean resets, and identity notes as aligned rewards.",
+      "Use a simple tracker, visible progress, and aligned completion rituals to reinforce good habits without turning tracking into self-punishment.",
     commonMistakes: [
-      "Rewarding a habit with something that undermines it",
-      "Assuming distant benefits are motivating enough",
-      "Making rewards so elaborate they become the real habit"
-    ],
-    misconceptions: [
-      {
-        misconception: "Rewards make habits childish.",
-        correction:
-          "Feedback is how behavior learns. Adults also repeat what feels rewarding."
-      }
-    ],
-    retentionAnchors: [
-      "Immediate satisfaction teaches repetition.",
-      "Reward the habit in the same direction as the habit."
-    ],
-    takeaways: [
-      "Delayed benefits need immediate feedback.",
-      "Rewards should align with identity.",
-      "Satisfaction helps habits survive."
-    ],
-    relatedSections: ["immediate-rewards-delayed-outcomes", "habit-tracking-feedback"]
-  },
-  {
-    id: "immediate-rewards-delayed-outcomes",
-    title: "Immediate Rewards and Delayed Outcomes",
-    eyebrow: "Time",
-    minutes: 10,
-    summary:
-      "Good habits often ask for present effort in exchange for future benefit, so design must bridge the timing gap.",
-    objectives: [
-      "Understand temporal mismatch in habits",
-      "Add immediate signals to long-term behaviors",
-      "Reduce immediate rewards for harmful behaviors"
-    ],
-    concepts: ["delayed outcomes", "temporal mismatch", "short-term feedback"],
-    thesis:
-      "A central challenge of behavior change is timing. Exercise, saving, studying, and relationship repair often pay later. Scrolling, spending, snacking, and avoidance often pay now. Habit design must make future-oriented behavior feel rewarding in the present.",
-    nuance:
-      "The answer is not to pretend the future does not matter. It is to translate future value into present feedback: visible progress, reduced stress, identity evidence, streak repair, or a concrete sense of control.",
-    mentalModel: {
-      name: "Time-gap bridge",
-      explanation:
-        "When rewards are delayed, build a bridge of immediate feedback that keeps behavior alive.",
-      useWhen:
-        "Use this when a beneficial habit feels unrewarding because the payoff is distant."
-    },
-    scenario:
-      "A student studies consistently but exam results are weeks away.",
-    defaultApproach:
-      "Wait for grades to confirm whether the effort matters.",
-    betterApproach:
-      "Use recall scores, completed problem sets, and improved error logs as immediate indicators.",
-    whyItWorks:
-      "The learner receives near-term feedback that effort is converting into capability.",
-    applicationContext: "How to make learning satisfying before exams or results",
-    applicationSteps: [
-      "Identify the distant outcome",
-      "Define a near-term skill signal",
-      "Track the signal after each session",
-      "Review improvement weekly",
-      "Adjust study based on errors rather than mood"
-    ],
-    applicationResult:
-      "Learning becomes rewarding through visible mastery, not only final grades.",
-    exerciseTitle: "Bridge the reward gap",
-    exerciseInstructions:
-      "Create a near-term feedback signal for one long-term habit.",
-    exercisePrompts: [
-      "What payoff is delayed?",
-      "What near-term signal shows progress?",
-      "How will you see it after each repetition?"
-    ],
-    reflection:
-      "Which long-term behavior needs a better present-tense reward?",
-    whyThisMatters:
-      "The brain discounts distant rewards unless the system makes progress emotionally available now.",
-    practicalApplication:
-      "Use logs, charts, visible completions, before-and-after notes, and short reviews for long-horizon habits.",
-    commonMistakes: [
-      "Waiting for final outcomes to provide all motivation",
-      "Choosing feedback that does not reflect actual progress",
-      "Letting bad habits keep all the immediate rewards"
-    ],
-    misconceptions: [
-      {
-        misconception: "Long-term thinkers do not need immediate rewards.",
-        correction:
-          "Long-term thinkers often design immediate feedback so the long-term behavior survives."
-      }
-    ],
-    retentionAnchors: [
-      "Future value needs present feedback.",
-      "Bridge the reward gap."
-    ],
-    takeaways: [
-      "Timing shapes motivation.",
-      "Immediate feedback supports delayed rewards.",
-      "Good measures make progress visible."
-    ],
-    relatedSections: ["fourth-law-satisfying", "habit-tracking-feedback"]
-  },
-  {
-    id: "habit-tracking-feedback",
-    title: "Habit Tracking and Feedback",
-    eyebrow: "Feedback",
-    minutes: 11,
-    summary:
-      "Tracking makes behavior visible, creates immediate satisfaction, and helps distinguish pattern from mood.",
-    objectives: [
-      "Use tracking as feedback rather than punishment",
-      "Choose measures that reflect the behavior you want",
-      "Avoid streak fragility"
-    ],
-    concepts: ["tracking", "feedback loops", "streaks"],
-    thesis:
-      "Tracking works because it makes repetition visible. A mark on a calendar, a checked box, or a growing log gives the brain a small reward and gives the person a clearer view of the pattern.",
-    nuance:
-      "Tracking can become harmful when it turns into identity threat. The point is not to worship the streak. The point is to make behavior easier to notice, repeat, and repair.",
-    mentalModel: {
-      name: "Visible evidence",
-      explanation:
-        "Tracking converts invisible discipline into visible proof.",
-      useWhen:
-        "Use this when a habit is happening but progress feels intangible."
-    },
-    scenario:
-      "A learner reads most weekdays but feels inconsistent because they remember misses more than completions.",
-    defaultApproach:
-      "Rely on emotional memory to judge consistency.",
-    betterApproach:
-      "Track reading sessions and review the weekly pattern objectively.",
-    whyItWorks:
-      "The tracker replaces vague self-judgment with visible evidence.",
-    applicationContext: "How to track without becoming rigid",
-    applicationSteps: [
-      "Track the action, not your worth",
-      "Choose a measure that is easy to record",
-      "Review weekly rather than obsess hourly",
-      "Use misses as diagnostic data",
-      "Protect recovery with a never-miss-twice rule"
-    ],
-    applicationResult:
-      "Tracking supports consistency without turning imperfection into failure.",
-    exerciseTitle: "Design a humane tracker",
-    exerciseInstructions:
-      "Create a tracker that rewards repetition and invites repair after misses.",
-    exercisePrompts: [
-      "What single behavior will you track?",
-      "How quickly can it be recorded?",
-      "What will you do after one miss?"
-    ],
-    reflection:
-      "Where would visible evidence help you judge your behavior more fairly?",
-    whyThisMatters:
-      "Feedback helps behavior improve; shame makes people hide from feedback.",
-    practicalApplication:
-      "Track simple actions, review patterns, and use misses to adjust cues, friction, or rewards.",
-    commonMistakes: [
-      "Tracking too many things",
-      "Treating a broken streak as a broken identity",
-      "Tracking outcomes when the behavior is what needs reinforcement"
+      "Waiting for distant outcomes to provide all motivation",
+      "Using rewards that undermine the habit",
+      "Treating a broken streak as a broken identity"
     ],
     misconceptions: [
       {
         misconception: "Tracking is about perfection.",
         correction:
-          "Good tracking is about visibility, feedback, and repair."
+          "Good tracking is about feedback, visibility, satisfaction, and repair."
       }
     ],
-    retentionAnchors: [
-      "Track to see, not to shame.",
-      "A miss is data for redesign."
+    reflection:
+      "Which good habit needs a better present-tense reward to survive long enough for delayed benefits to arrive?",
+    exercises: [
+      "Create one visible progress signal.",
+      "Define one aligned reward for completion.",
+      "Write a recovery rule for the first missed day."
+    ],
+    anchors: [
+      "Immediate satisfaction teaches repetition.",
+      "Track to see, not to shame."
     ],
     takeaways: [
-      "Tracking creates immediate satisfaction.",
-      "Simple trackers are more durable.",
-      "Review patterns, not isolated bad days."
+      "Good habits need present feedback.",
+      "Tracking makes consistency visible.",
+      "Rewards should reinforce the identity behind the habit."
     ],
-    relatedSections: ["consistency-recovery", "small-habits-compound"]
-  },
-  {
-    id: "breaking-bad-habits-inversion",
-    title: "Breaking Bad Habits Through Inversion",
+    examples: [
+      "Answer one recall question after a lesson.",
+      "Mark a calendar after a walk.",
+      "Move money to savings and update a visible progress chart."
+    ],
+    relatedSections: ["make-it-attractive", "advanced-habit-design"]
+  }),
+  chapter({
+    id: "breaking-bad-habits",
+    title: "Breaking Bad Habits",
     eyebrow: "Inversion",
-    minutes: 12,
+    minutes: 31,
     summary:
-      "Bad habits weaken when their cues become invisible, their appeal decreases, their friction increases, and their rewards become less satisfying.",
+      "Bad habits are weakened by inverting the four laws: make them invisible, unattractive, difficult, and unsatisfying.",
     objectives: [
-      "Apply the inverse of the four laws",
-      "Replace bad habits by satisfying the underlying need",
-      "Design friction before cravings peak"
+      "Apply the inverse four laws to unwanted behaviors",
+      "Understand the job a bad habit performs",
+      "Design replacements instead of relying only on suppression"
     ],
-    concepts: ["inversion", "replacement", "commitment devices"],
-    thesis:
-      "Breaking a bad habit is not simply deleting an action. The action is doing a job, even if poorly. The inverse laws change the loop: make the cue invisible, make the habit unattractive, make it difficult, and make it unsatisfying.",
-    nuance:
-      "Suppression alone leaves a vacancy. If the bad habit provides relief, stimulation, belonging, or control, the replacement must address that need. Otherwise the original loop returns under stress.",
-    mentalModel: {
-      name: "Vacancy principle",
-      explanation:
-        "Removing a habit creates an empty role. Fill the role with a better behavior or the old one will reapply.",
-      useWhen:
-        "Use this when you keep eliminating a habit but it returns during stress."
-    },
-    scenario:
-      "Someone wants to stop late-night scrolling after stressful workdays.",
-    defaultApproach:
-      "Delete apps repeatedly without changing the evening recovery need.",
-    betterApproach:
-      "Charge the phone outside the bedroom, plan a decompression walk, and put a low-effort book near the bed.",
-    whyItWorks:
-      "The system removes the cue, adds friction, and replaces the reward of relief.",
-    applicationContext: "How to stop late-night scrolling",
-    applicationSteps: [
-      "Name the craving the bad habit satisfies",
-      "Remove the cue before the vulnerable window",
-      "Add friction to the old response",
-      "Install a replacement response",
-      "Make the cost of the old habit visible"
+    concepts: ["inversion", "replacement behavior", "friction", "craving"],
+    body: [
+      "Bad habits are not usually random. They persist because they work in the short term. They provide relief, stimulation, comfort, certainty, belonging, avoidance, or a feeling of control. The problem is that their long-term consequences are often misaligned with the life the person wants.",
+      "The mistake is trying to delete the behavior without understanding the job it performs. If late-night scrolling provides decompression, deleting apps may help, but decompression still needs a place to go. If impulsive spending provides status or emotional relief, a budget alone may not address the craving. If procrastination provides escape from ambiguity, the task itself needs a clearer first step.",
+      "The inversion of the four laws gives a practical structure. Make it invisible: remove or reduce cues. Make it unattractive: change the story and make the real cost visible. Make it difficult: add friction before the vulnerable moment. Make it unsatisfying: add accountability, remove the reward, or make the aftermath more visible.",
+      "Replacement is essential. A bad habit leaves a vacancy. If the replacement does not satisfy the underlying craving, the old behavior remains the most efficient path to the desired state. The goal is not merely to stop scrolling; it may be to recover. Not merely to stop snacking; perhaps to rest. Not merely to stop avoiding a project; perhaps to clarify the next action.",
+      "Breaking bad habits is therefore an act of design, not just restraint. You are redesigning cues, friction, rewards, and emotional pathways so the old loop becomes less automatic and a better loop becomes more available.",
+      "This approach is humane because it treats the behavior as understandable without pretending it is harmless. You can take responsibility for redesigning the system without turning every bad habit into a moral failure."
     ],
-    applicationResult:
-      "The person changes the loop instead of relying on tired willpower.",
-    exerciseTitle: "Invert one bad habit",
-    exerciseInstructions:
-      "Apply the inverse four laws to one unwanted behavior.",
-    exercisePrompts: [
-      "How can the cue become invisible?",
-      "How can the habit become less attractive or harder?",
-      "What replacement will satisfy the real craving?"
+    support: [
+      {
+        type: "framework",
+        title: "The inversion method",
+        stages: [
+          {
+            name: "Invisible",
+            description: "Remove the cue or keep it out of the vulnerable context."
+          },
+          {
+            name: "Unattractive",
+            description: "Make the real cost more vivid than the short-term reward."
+          },
+          {
+            name: "Difficult",
+            description: "Add steps, distance, waiting periods, or accountability."
+          },
+          {
+            name: "Unsatisfying",
+            description: "Reduce the reward and increase honest feedback."
+          }
+        ]
+      },
+      {
+        type: "expandedExample",
+        scenario: "Stopping late-night scrolling.",
+        defaultApproach:
+          "Tell yourself not to scroll while keeping the phone beside the bed after a stressful day.",
+        betterApproach:
+          "Charge the phone outside the bedroom, use a separate alarm, plan a decompression ritual, and place a low-effort book on the nightstand.",
+        whyItWorks:
+          "The cue is removed, friction is added, and the underlying need for recovery receives a better path."
+      },
+      {
+        type: "exercise",
+        title: "Invert one unwanted loop",
+        instructions:
+          "Choose one bad habit and redesign it through the inverse four laws.",
+        prompts: [
+          "What cue can be removed or hidden?",
+          "What craving does the habit satisfy?",
+          "What replacement can satisfy that craving with fewer costs?"
+        ]
+      }
     ],
-    reflection:
-      "What bad habit are you trying to remove without replacing the job it performs?",
     whyThisMatters:
-      "Bad habits are often well-designed for immediate reward; they require deliberate counter-design.",
+      "Bad habits are often well-designed for immediate reward. They need counter-design, not just stronger intentions.",
     practicalApplication:
-      "Use app blockers, physical distance, public commitments, replacement routines, and cost visibility.",
+      "Map the loop, identify the craving, remove cues, add friction, and install a replacement behavior that solves the same underlying need more cleanly.",
     commonMistakes: [
-      "Removing the behavior but not the cue",
-      "Adding friction only after the habit has started",
-      "Failing to replace the reward"
+      "Removing a behavior without replacing its emotional function",
+      "Adding friction too late in the loop",
+      "Treating the bad habit as irrational instead of understanding its short-term reward"
     ],
     misconceptions: [
       {
-        misconception: "Breaking a bad habit is mainly about wanting it badly enough.",
+        misconception: "Breaking a bad habit is mainly about wanting change badly enough.",
         correction:
-          "Desire helps, but loop design determines what happens when energy is low."
+          "Desire matters, but the loop must be redesigned for moments when desire is not enough."
       }
     ],
-    retentionAnchors: [
-      "Invert the laws: invisible, unattractive, difficult, unsatisfying.",
+    reflection:
+      "What unwanted habit are you trying to remove without replacing the job it performs?",
+    exercises: [
+      "Write the cue, craving, response, and reward of one bad habit.",
+      "Apply the inverse four laws.",
+      "Choose a replacement behavior that satisfies the real craving."
+    ],
+    anchors: [
+      "Make bad habits invisible, unattractive, difficult, and unsatisfying.",
       "Replace the job, not just the behavior."
     ],
     takeaways: [
-      "Bad habits have structure.",
-      "The inverse laws are practical tools.",
-      "Replacement beats pure suppression."
+      "Bad habits often solve real short-term needs.",
+      "The inverse laws create practical intervention points.",
+      "Replacement is more durable than suppression alone."
     ],
-    relatedSections: ["habit-loop", "friction-convenience"]
-  },
-  {
-    id: "systems-vs-goals",
-    title: "Systems vs Goals",
-    eyebrow: "Systems",
-    minutes: 12,
+    examples: [
+      "Remove social media cues before the evening begins.",
+      "Add a 24-hour waiting period before discretionary purchases.",
+      "Replace stress snacking with a decompression walk or written worry list."
+    ],
+    relatedSections: ["habit-loop", "make-it-easy"]
+  }),
+  chapter({
+    id: "systems-over-goals",
+    title: "Systems Over Goals",
+    eyebrow: "Strategy",
+    minutes: 30,
     summary:
-      "Goals set direction, but systems create repeatable progress and determine what happens after motivation fades.",
+      "Goals provide direction, but systems determine whether progress becomes repeatable.",
     objectives: [
       "Understand why goals are useful but insufficient",
-      "Convert goals into weekly operating systems",
-      "Avoid treating the goal as the plan"
+      "Convert outcomes into repeatable systems",
+      "Use identity, process, and review to sustain progress"
     ],
-    concepts: ["systems", "goals", "operating rhythm"],
-    thesis:
-      "Winners and losers often share similar goals. The difference is usually the system: the repeated process, feedback, environment, and review rhythm that makes progress likely. Goals point; systems move.",
-    nuance:
-      "This does not mean goals are useless. A goal helps define direction and standards. The mistake is stopping there. A goal without a system creates emotional pressure but does not specify behavior.",
-    mentalModel: {
-      name: "Operating system",
-      explanation:
-        "A system is the recurring set of behaviors and reviews that keeps producing progress.",
-      useWhen:
-        "Use this when you know what you want but do not know what repeats each week."
-    },
-    scenario:
-      "A person wants to advance their career by becoming more strategic.",
-    defaultApproach:
-      "Set a vague goal to be more strategic this year.",
-    betterApproach:
-      "Schedule a weekly decision review, read one industry memo, and write one synthesis note every Friday.",
-    whyItWorks:
-      "The system turns a vague capability into recurring behaviors that create judgment over time.",
-    applicationContext: "How to convert one goal into a weekly operating system",
-    applicationSteps: [
-      "Write the goal",
-      "Define the behavior that produces progress",
-      "Choose a weekly cadence",
-      "Define a review question",
-      "Remove or reduce one friction point"
+    concepts: ["systems", "goals", "process", "review"],
+    body: [
+      "Atomic Habits is often summarized as systems over goals, but that phrase needs nuance. Goals are not useless. They clarify direction. A goal can tell you what matters, what standard you are aiming for, and what outcome would count as progress. The problem is treating the goal as the plan.",
+      "Many people who succeed and fail share similar goals. Competing athletes want to win. Entrepreneurs want revenue. Students want high scores. Professionals want advancement. The difference is usually not the existence of a goal but the quality of the system that repeatedly produces behavior.",
+      "A system includes the recurring actions, environment, feedback loops, review cadence, and identity that make progress likely. If the goal is to write a book, the system is the protected writing block, the note capture process, the editing rhythm, and the review of pages produced. If the goal is to learn, the system is the reading habit, recall practice, application notes, and spaced review.",
+      "Goals can also create a finish-line problem. If the behavior exists only to reach a target, the behavior may disappear once the target is reached. Systems keep value in the process. The person who exercises only to hit a number may stop after reaching it. The person who sees themselves as someone who trains has a reason to continue.",
+      "The practical move is to translate every important goal into a weekly operating system. What behavior repeats? When does it happen? What environment supports it? What feedback shows whether it is working? What review question keeps it adaptive? Without those answers, the goal may create pressure but not movement.",
+      "A good system should be small enough to run and serious enough to matter. Overly elaborate systems collapse under their own weight. The best system is often a simple set of repeated behaviors with honest feedback."
     ],
-    applicationResult:
-      "The goal becomes a living routine with feedback.",
-    exerciseTitle: "Goal-to-system conversion",
-    exerciseInstructions:
-      "Convert one goal into a weekly system with behavior, cadence, and review.",
-    exercisePrompts: [
-      "What is the goal?",
-      "What repeats weekly?",
-      "How will you know the system is improving?"
+    support: [
+      {
+        type: "keyDistinction",
+        title: "Goal vs system",
+        not: "The goal is the plan.",
+        but: "The goal is the direction; the system is what repeats."
+      },
+      {
+        type: "expandedExample",
+        scenario: "A professional wants to become more strategic.",
+        defaultApproach:
+          "Set a vague annual goal to think more strategically.",
+        betterApproach:
+          "Schedule a weekly decision review, read one industry memo, and write one synthesis note every Friday.",
+        whyItWorks:
+          "The system turns a desired capability into repeated behavior and feedback."
+      },
+      {
+        type: "exercise",
+        title: "Convert a goal into a system",
+        instructions:
+          "Choose one goal and translate it into a weekly operating rhythm.",
+        prompts: [
+          "What behavior would make this goal more likely?",
+          "When will that behavior repeat?",
+          "What feedback will you review weekly?"
+        ]
+      }
     ],
-    reflection:
-      "Which goal in your life is still pretending to be a plan?",
     whyThisMatters:
-      "A goal can inspire action once; a system can produce action repeatedly.",
+      "A goal can inspire action once, but a system can produce action repeatedly.",
     practicalApplication:
-      "Use weekly systems for health, learning, money, career, relationships, and creative output.",
+      "For one important goal, define the recurring behavior, cue, environment, feedback measure, and weekly review question.",
     commonMistakes: [
       "Treating the target as the method",
       "Building a system too complex to repeat",
-      "Failing to review whether the system is working"
+      "Ignoring identity and feedback after setting the goal"
     ],
     misconceptions: [
       {
-        misconception: "Systems mean you should ignore outcomes.",
+        misconception: "Systems over goals means goals do not matter.",
         correction:
-          "Systems use outcomes as feedback but focus daily attention on repeatable process."
+          "Goals set direction. Systems make movement repeatable."
       }
     ],
-    retentionAnchors: [
+    reflection:
+      "Which goal in your life has a destination but no operating system?",
+    exercises: [
+      "Write one goal.",
+      "Define the weekly behavior that supports it.",
+      "Create one review question for the system."
+    ],
+    anchors: [
       "Goals point. Systems move.",
       "The plan is what repeats."
     ],
     takeaways: [
-      "Goals define direction.",
-      "Systems define behavior.",
-      "Review keeps systems adaptive."
+      "Goals provide direction but not execution.",
+      "Systems include behavior, environment, feedback, and review.",
+      "Identity helps systems continue after targets are reached."
     ],
-    relatedSections: ["outcomes-processes-identity", "advanced-habit-design"]
-  },
-  {
-    id: "plateaus-delayed-results",
-    title: "Plateaus, Latent Potential, and Delayed Results",
-    eyebrow: "Patience",
-    minutes: 11,
-    summary:
-      "Progress often hides below the surface until accumulated effort crosses a visible threshold.",
-    objectives: [
-      "Interpret plateaus without quitting prematurely",
-      "Use leading indicators during delayed results",
-      "Understand threshold effects in learning and behavior"
+    examples: [
+      "A learning goal becomes a reading, recall, and review system.",
+      "A money goal becomes payday automation and a weekly review.",
+      "A career goal becomes a recurring output and feedback cadence."
     ],
-    concepts: ["latent potential", "plateau", "threshold effects"],
-    thesis:
-      "A plateau is not always evidence that nothing is happening. Many systems store effort before results show up. Learning, fitness, reputation, trust, and creative skill often grow invisibly until a threshold is crossed.",
-    nuance:
-      "Patience should not become denial. If leading indicators are poor, redesign the system. If leading indicators are improving but outcomes lag, the task is to stay with the process long enough for stored effort to express itself.",
-    mentalModel: {
-      name: "Latent accumulation",
-      explanation:
-        "Progress can be real before it is visible because the system is accumulating capacity.",
-      useWhen:
-        "Use this when effort is consistent but external results have not caught up."
-    },
-    scenario:
-      "A language learner studies daily but still struggles in conversation.",
-    defaultApproach:
-      "Conclude the method is useless because fluency has not arrived.",
-    betterApproach:
-      "Track vocabulary recall, listening comprehension, and shorter response time as signs of latent progress.",
-    whyItWorks:
-      "The learner sees capability forming before the final outcome becomes smooth.",
-    applicationContext: "How to persist through skill plateaus",
-    applicationSteps: [
-      "Define the visible outcome",
-      "Identify hidden capacities that precede it",
-      "Track those capacities",
-      "Adjust methods based on evidence",
-      "Expect thresholds rather than straight lines"
-    ],
-    applicationResult:
-      "The learner remains patient without becoming passive.",
-    exerciseTitle: "Name the hidden capacity",
-    exerciseInstructions:
-      "For one plateau, identify what may be accumulating beneath the visible result.",
-    exercisePrompts: [
-      "What visible result is delayed?",
-      "What hidden skill must grow first?",
-      "What leading signal can you track?"
-    ],
-    reflection:
-      "Where might you be judging stored effort before it has crossed a threshold?",
-    whyThisMatters:
-      "People abandon good systems when they mistake delayed results for absent progress.",
-    practicalApplication:
-      "Use leading indicators and review windows before changing a system.",
-    commonMistakes: [
-      "Expecting linear results from nonlinear systems",
-      "Calling every plateau a failure",
-      "Using patience to avoid necessary redesign"
-    ],
-    misconceptions: [
-      {
-        misconception: "A plateau means the system is broken.",
-        correction:
-          "A plateau may indicate stored progress, but it should be evaluated with leading indicators."
-      }
-    ],
-    retentionAnchors: [
-      "Progress can hide before it shows.",
-      "Patience plus feedback beats blind persistence."
-    ],
-    takeaways: [
-      "Results can lag effort.",
-      "Track hidden capacity.",
-      "Redesign based on evidence, not impatience."
-    ],
-    relatedSections: ["small-habits-compound", "habit-tracking-feedback"]
-  },
-  {
-    id: "consistency-recovery",
-    title: "Consistency, Recovery, and Never Missing Twice",
-    eyebrow: "Recovery",
-    minutes: 11,
-    summary:
-      "Consistency is the skill of returning quickly, not the fantasy of never missing.",
-    objectives: [
-      "Redefine consistency as recovery",
-      "Use minimum versions during disruption",
-      "Prevent one miss from becoming a new pattern"
-    ],
-    concepts: ["recovery", "minimum viable habit", "never miss twice"],
-    thesis:
-      "The crucial habit skill is not perfect streak maintenance. It is rapid return. Life will interrupt any system. A resilient habit includes a recovery rule so one missed day does not become an identity collapse.",
-    nuance:
-      "Never missing twice is not a law of morality; it is a pattern interrupt. It keeps the old identity from collecting fresh evidence. The second miss matters because it starts to teach the system a new normal.",
-    mentalModel: {
-      name: "Return speed",
-      explanation:
-        "The health of a habit is measured by how quickly you return after disruption.",
-      useWhen:
-        "Use this when a miss threatens to become abandonment."
-    },
-    scenario:
-      "A person misses two workouts while traveling and feels the whole plan is ruined.",
-    defaultApproach:
-      "Wait until next month to restart properly.",
-    betterApproach:
-      "Do a ten-minute hotel-room workout the next morning and resume the normal plan later.",
-    whyItWorks:
-      "The minimum version protects identity and prevents a miss from becoming a story of failure.",
-    applicationContext: "How to recover after missing a habit",
-    applicationSteps: [
-      "Expect disruptions in advance",
-      "Define the minimum viable habit",
-      "Use the minimum version immediately after a miss",
-      "Avoid emotional accounting",
-      "Review what caused the miss and redesign one cue or friction point"
-    ],
-    applicationResult:
-      "The habit becomes robust under real-life conditions.",
-    exerciseTitle: "Write a recovery protocol",
-    exerciseInstructions:
-      "Create a specific rule for what you will do after missing a habit once.",
-    exercisePrompts: [
-      "What is the minimum version?",
-      "When will you do it after a miss?",
-      "What will you review without self-attack?"
-    ],
-    reflection:
-      "What habit needs a return plan more than it needs a stricter streak?",
-    whyThisMatters:
-      "Rigid habit systems break; resilient systems bend and return.",
-    practicalApplication:
-      "Use minimum versions, backup contexts, travel plans, and next-day repair rituals.",
-    commonMistakes: [
-      "Interpreting a miss as identity evidence",
-      "Waiting for a perfect restart",
-      "Making the minimum version too large"
-    ],
-    misconceptions: [
-      {
-        misconception: "Consistency means never missing.",
-        correction:
-          "Consistency means misses are brief and repaired quickly."
-      }
-    ],
-    retentionAnchors: [
-      "Never let one miss become the new normal.",
-      "Return speed is a habit skill."
-    ],
-    takeaways: [
-      "Recovery is part of the system.",
-      "Minimum habits protect continuity.",
-      "Misses are diagnostic data."
-    ],
-    relatedSections: ["two-minute-rule", "habit-tracking-feedback"]
-  },
-  {
+    relatedSections: ["identity-based-change", "advanced-habit-design"]
+  }),
+  chapter({
     id: "advanced-habit-design",
-    title: "Advanced Habit Design",
-    eyebrow: "Practice",
-    minutes: 13,
+    title: "Advanced Habit Design in Real Life",
+    eyebrow: "Integration",
+    minutes: 34,
     summary:
-      "Advanced practice combines identity, environment, friction, rewards, reviews, and seasonal focus into a personal operating system.",
+      "Advanced habit design means using the four laws diagnostically and building systems that survive disruption, plateaus, and changing seasons.",
     objectives: [
-      "Use the four laws as a diagnostic system",
-      "Build seasonal habit priorities",
-      "Create review loops that keep habits adaptive"
+      "Use the four laws as a diagnostic framework",
+      "Understand plateaus and delayed results",
+      "Build recovery rules and seasonal habit systems"
     ],
-    concepts: ["habit operating system", "seasonal focus", "review loop"],
-    thesis:
-      "Advanced habit design is not adding dozens of habits. It is choosing a high-leverage behavior, designing the loop carefully, and reviewing it as life changes. The mature practitioner asks which part of the system is failing rather than blaming personality.",
-    nuance:
-      "More habits can become less progress when they fragment attention. A single keystone behavior, designed well and reviewed consistently, can improve an entire domain.",
-    mentalModel: {
-      name: "Habit lab",
-      explanation:
-        "Treat habits as experiments: design, run, observe, adjust.",
-      useWhen:
-        "Use this when a habit is important enough to refine instead of merely restart."
-    },
-    scenario:
-      "A founder wants better focus, health, and learning all at once.",
-    defaultApproach:
-      "Launch a large routine with ten new behaviors on Monday.",
-    betterApproach:
-      "Choose deep work as the seasonal keystone, design its cue and friction, and review it weekly.",
-    whyItWorks:
-      "Focus creates downstream benefits without overwhelming the system.",
-    applicationContext: "How to build a seasonal habit operating system",
-    applicationSteps: [
-      "Choose one keystone behavior for the season",
-      "Define identity, cue, response, and reward",
-      "Design environment and friction",
-      "Track a simple leading indicator",
-      "Review weekly and adjust one variable at a time"
+    concepts: ["diagnosis", "plateaus", "recovery", "seasonal focus"],
+    body: [
+      "The beginner asks, How do I get motivated? The more advanced practitioner asks, Which part of the system is failing? If the behavior is forgotten, the cue may be weak. If the behavior is resisted, the craving may not be attractive enough. If the behavior is delayed, the response may be too hard. If the behavior does not repeat, the reward may be too thin or too delayed.",
+      "This diagnostic posture is one of the strongest ways to use the book. Instead of restarting the same habit with more intensity, you inspect the loop. Maybe the reading habit failed because the book was not visible. Maybe the workout failed because the first step required too much setup. Maybe the budget failed because saving was invisible and spending was vivid. The solution depends on the failure point.",
+      "Real life also includes plateaus. Progress often hides beneath the surface before it becomes visible. Learning, fitness, reputation, trust, and creative skill all have delayed results. The danger is quitting a good system because the final outcome has not appeared. The countermeasure is tracking leading indicators: repetitions, pages, recall, practice sessions, conversations, drafts, saved dollars.",
+      "At the same time, patience should not become denial. If leading indicators are poor, redesign the system. If leading indicators are improving but outcomes lag, keep going long enough for stored effort to express itself. The skill is knowing whether a plateau needs persistence or adjustment.",
+      "Consistency should also be understood realistically. The goal is not a flawless streak. The goal is rapid return. A resilient habit includes a minimum version and a recovery rule. Never missing twice is less about moral discipline and more about preventing one miss from becoming a new pattern.",
+      "Advanced habit design often means fewer habits, not more. Choose a seasonal keystone behavior, design it through the four laws, track one leading indicator, and review it weekly. A single well-designed habit can improve an entire domain because it changes the operating rhythm around it."
     ],
-    applicationResult:
-      "Habit change becomes deliberate iteration instead of repeated relaunching.",
-    exerciseTitle: "Design one seasonal keystone",
-    exerciseInstructions:
-      "Choose one keystone habit and design it through the four laws.",
-    exercisePrompts: [
-      "What behavior would make other behaviors easier?",
-      "Which law is most likely to fail?",
-      "What will you review each week?"
+    support: [
+      {
+        type: "framework",
+        title: "Habit diagnosis questions",
+        stages: [
+          {
+            name: "Cue",
+            description: "Is the behavior obvious in the right context?"
+          },
+          {
+            name: "Craving",
+            description: "Does the behavior feel worth approaching?"
+          },
+          {
+            name: "Response",
+            description: "Is the first step easy enough under real conditions?"
+          },
+          {
+            name: "Reward",
+            description: "Is there immediate feedback that reinforces repetition?"
+          }
+        ]
+      },
+      {
+        type: "expandedExample",
+        scenario: "Recovering after missing a workout while traveling.",
+        defaultApproach:
+          "Treat the missed session as proof the plan failed and wait for a perfect restart.",
+        betterApproach:
+          "Use the minimum version the next morning, such as ten minutes of bodyweight movement, then resume the normal plan when home.",
+        whyItWorks:
+          "The recovery behavior protects identity and prevents disruption from becoming abandonment."
+      },
+      {
+        type: "exercise",
+        title: "Design a recovery rule",
+        instructions:
+          "Choose one habit and decide what happens after the first miss.",
+        prompts: [
+          "What is the minimum viable version?",
+          "When will you do it after a miss?",
+          "What will you inspect without self-attack?"
+        ]
+      }
     ],
-    reflection:
-      "What single habit would change the rest of your operating system if it became reliable?",
     whyThisMatters:
-      "Scalable behavior change requires prioritization and review, not endless additions.",
+      "Habits fail in predictable ways. A diagnostic approach lets you redesign the system instead of repeatedly blaming yourself.",
     practicalApplication:
-      "Use seasonal habit reviews for work, health, study, money, and family rhythms.",
+      "Choose one keystone habit for the next month, design it through the four laws, track one leading indicator, and review misses as data.",
     commonMistakes: [
       "Trying to optimize every habit at once",
-      "Changing multiple variables so you cannot learn what worked",
-      "Skipping review after the launch energy fades"
+      "Changing multiple variables before learning what failed",
+      "Treating a missed day as identity evidence"
     ],
     misconceptions: [
       {
-        misconception: "Advanced habit design means complex systems.",
+        misconception: "Advanced habit design means complex routines.",
         correction:
-          "Advanced design often means fewer habits, clearer loops, and better review."
+          "Advanced design usually means clearer loops, better recovery, and more disciplined review."
       }
     ],
-    retentionAnchors: [
-      "Design one keystone. Review weekly.",
-      "A habit is an experiment, not a verdict."
+    reflection:
+      "What habit needs diagnosis and recovery rules more than it needs another motivational restart?",
+    exercises: [
+      "Run the four-law diagnosis on one habit.",
+      "Define a minimum viable version.",
+      "Schedule a weekly review for the next four weeks."
+    ],
+    anchors: [
+      "Diagnose the loop before restarting the habit.",
+      "Consistency is the skill of returning quickly."
     ],
     takeaways: [
-      "Use the four laws diagnostically.",
-      "Prioritize keystone behaviors.",
-      "Review keeps systems alive."
+      "The four laws are diagnostic tools.",
+      "Plateaus require leading indicators.",
+      "Recovery rules make habits resilient."
     ],
-    relatedSections: ["systems-vs-goals", "habit-scorecards-awareness"]
-  },
-  {
-    id: "work-application",
-    title: "Applying Atomic Habits to Work",
+    examples: [
+      "Track recall questions before judging whether studying works.",
+      "Use a minimum workout after travel disruption.",
+      "Choose deep work as a seasonal keystone instead of adding ten new routines."
+    ],
+    relatedSections: ["make-it-satisfying", "systems-over-goals"]
+  }),
+  chapter({
+    id: "applied-habit-playbooks",
+    title: "Applied Habit Playbooks",
     eyebrow: "Application",
-    minutes: 12,
+    minutes: 38,
     summary:
-      "At work, habits shape attention, decision quality, communication, and the reliability of creative output.",
+      "The framework transfers across work, health, learning, money, and relationships because each domain is built from repeated behavior.",
     objectives: [
-      "Apply habit design to deep work",
-      "Reduce workplace distraction loops",
-      "Build professional systems for review and output"
+      "Apply habit design across multiple real-life domains",
+      "See how the same principles adapt to different book-specific contexts",
+      "Build practical playbooks without forcing every habit into one template"
     ],
-    concepts: ["deep work routines", "communication defaults", "review cadence"],
-    thesis:
-      "Work habits determine what receives your best attention. In many jobs, the default environment is optimized for responsiveness, not depth. Habit design can protect focus, improve decision loops, and make important work easier to start.",
-    nuance:
-      "The goal is not to ignore collaboration. The goal is to stop allowing every signal to have equal claim on attention. Good work systems distinguish communication windows from creation windows.",
-    mentalModel: {
-      name: "Attention allocation",
-      explanation:
-        "Your workday is a portfolio of attention. Habits decide where the best hours are invested.",
-      useWhen:
-        "Use this when urgent inputs keep crowding out important output."
-    },
-    scenario:
-      "A manager begins each morning in chat and loses the only quiet hour of the day.",
-    defaultApproach:
-      "Check messages quickly before starting strategic work.",
-    betterApproach:
-      "Start with a 60-minute strategy block, then open communication tools at a scheduled time.",
-    whyItWorks:
-      "The highest-value work receives attention before reactive loops take over.",
-    applicationContext: "How to apply habit stacking for deep work",
-    applicationSteps: [
-      "Choose the protected work block",
-      "Create a start cue",
-      "Block the default distraction",
-      "Define a small first output",
-      "End by preparing tomorrow's first task"
+    concepts: ["transfer", "domain playbooks", "keystone behaviors"],
+    body: [
+      "The power of Atomic Habits is that the framework transfers. The same four laws can improve work, health, learning, money, and relationships because all of those domains are shaped by repeated behavior. But transfer does not mean every domain is identical. A finance habit, a relationship habit, and a deep work habit each require different sensitivity to context.",
+      "At work, habit design is largely attention design. Most modern work environments make responsiveness obvious and deep work obscure. A good work playbook protects the first high-quality attention block, defines communication windows, prepares the next task before ending the day, and creates a weekly review. The habit is not productivity theater; it is repeated allocation of attention.",
+      "In health, the most important design often happens before the vulnerable moment. Plan food before hunger, prepare movement before fatigue, and make sleep cues visible before the evening becomes reactive. A health system designed for ideal energy is incomplete. It has to work for tired, busy, ordinary life.",
+      "In learning, the key is turning exposure into retention. Reading is not the same as understanding. A strong learning habit includes recall, compression, and application. After a lesson, write the core idea in one sentence, create a recall question, and apply the idea to a real situation. This makes knowledge usable instead of merely familiar.",
+      "In money, the framework helps because financial behavior repeats under emotion, convenience, and status pressure. Automate saving before spending is visible. Add friction to impulsive purchases. Use a weekly review that produces learning rather than shame. Build the identity of someone who protects future options.",
+      "In relationships, habits are repeated signals of attention, care, repair, and presence. Put the phone away during the first minutes at home. Send the follow-up message. Hold a weekly check-in. Repair quickly after a miss. The point is not to mechanize affection; it is to create reliable spaces where affection can be expressed."
     ],
-    applicationResult:
-      "Important work becomes scheduled behavior rather than leftover time.",
-    exerciseTitle: "Design a workday opening loop",
-    exerciseInstructions:
-      "Create a first-hour routine that protects the most valuable work.",
-    exercisePrompts: [
-      "What should receive your best attention?",
-      "What cue starts it?",
-      "What default must wait?"
+    support: [
+      {
+        type: "comparisonTable",
+        title: "Domain playbooks",
+        columns: ["Domain", "Keystone habit", "Design focus"],
+        rows: [
+          ["Work", "First deep work block", "Protect attention before reactive tools open"],
+          ["Health", "Prepared default meal or walk", "Design for tired, hungry, low-energy moments"],
+          ["Learning", "Read, recall, apply", "Turn input into retained knowledge"],
+          ["Money", "Payday automation and review", "Make saving default and spending deliberate"],
+          ["Relationships", "Transition ritual", "Make care visible in ordinary moments"]
+        ]
+      },
+      {
+        type: "expandedExample",
+        scenario: "Building a learning habit for serious nonfiction.",
+        defaultApproach:
+          "Read quickly, highlight heavily, and assume familiarity equals understanding.",
+        betterApproach:
+          "After each lesson, write one-sentence compression, answer one recall prompt, and record one practical application.",
+        whyItWorks:
+          "The habit turns reading into retrieval and use, which makes the ideas more durable."
+      },
+      {
+        type: "exercise",
+        title: "Choose one domain playbook",
+        instructions:
+          "Pick one domain and design a keystone habit through cue, response, reward, and review.",
+        prompts: [
+          "Which domain would benefit most from one reliable habit?",
+          "What repeated behavior would create leverage?",
+          "How will the four laws shape that behavior?"
+        ]
+      }
     ],
-    reflection:
-      "What work habit currently spends your best attention too cheaply?",
     whyThisMatters:
-      "Professional outcomes compound from repeated allocation of attention.",
+      "A framework becomes valuable when it transfers from the page into ordinary decisions, routines, and relationships.",
     practicalApplication:
-      "Use focus blocks, communication windows, weekly reviews, and prepared first tasks.",
+      "Choose one domain, identify the repeated behavior with the most leverage, and design it through cues, friction, reward, and review.",
     commonMistakes: [
-      "Letting communication tools set the day's agenda",
-      "Planning deep work without blocking cues",
-      "Ending work without preparing the next start"
+      "Applying the framework too generically without respecting the domain",
+      "Choosing too many domain habits at once",
+      "Confusing consumption of ideas with application"
     ],
     misconceptions: [
       {
-        misconception: "Work habits are just personal productivity tricks.",
+        misconception: "The same habit template works unchanged everywhere.",
         correction:
-          "They are systems for allocating attention, producing output, and improving decisions."
+          "The same principles transfer, but each domain has different cues, rewards, constraints, and risks."
       }
-    ],
-    retentionAnchors: [
-      "Protect your best attention before the day spends it.",
-      "Start work with the output you value most."
-    ],
-    takeaways: [
-      "Work defaults shape output.",
-      "Deep work needs cues and boundaries.",
-      "Review loops improve professional judgment."
-    ],
-    relatedSections: ["habit-stacking", "systems-vs-goals"]
-  },
-  {
-    id: "health-application",
-    title: "Applying Atomic Habits to Health",
-    eyebrow: "Application",
-    minutes: 12,
-    summary:
-      "Health habits improve when food, movement, sleep, and recovery are designed as defaults rather than repeated acts of restraint.",
-    objectives: [
-      "Apply environment design to health",
-      "Reduce reliance on willpower around food and exercise",
-      "Create small recovery-friendly health systems"
-    ],
-    concepts: ["health defaults", "food environment", "movement cues"],
-    thesis:
-      "Health behavior is highly context-sensitive. What is visible in the kitchen, packed in the bag, scheduled after work, and normal in the household often matters more than a promise to be disciplined later.",
-    nuance:
-      "Health habits should be designed for low-energy states. A plan that works only when you are rested and motivated is not yet a health system.",
-    mentalModel: {
-      name: "Low-energy design",
-      explanation:
-        "Design health habits for the version of you who is tired, rushed, and hungry.",
-      useWhen:
-        "Use this when health plans collapse at the predictable hard moments."
-    },
-    scenario:
-      "A person plans to eat well but arrives home hungry to an unprepared kitchen.",
-    defaultApproach:
-      "Rely on restraint while convenient snack cues are visible.",
-    betterApproach:
-      "Prepare a default meal, put fruit and protein at eye level, and keep snack foods inconvenient.",
-    whyItWorks:
-      "The healthier option becomes the easy visible default when energy is low.",
-    applicationContext: "How to redesign your environment for better health",
-    applicationSteps: [
-      "Identify the vulnerable health decision",
-      "Prepare the desired option before the moment",
-      "Make it visible and easy",
-      "Hide or add friction to the less desired option",
-      "Create a small satisfaction signal after completion"
-    ],
-    applicationResult:
-      "Health improves through defaults instead of repeated self-denial.",
-    exerciseTitle: "Design one health default",
-    exerciseInstructions:
-      "Choose one recurring health decision and make the better option easier before the decision arrives.",
-    exercisePrompts: [
-      "When is the vulnerable moment?",
-      "What can be prepared earlier?",
-      "What cue should be visible?"
     ],
     reflection:
-      "Which health choice are you asking tired willpower to solve every day?",
-    whyThisMatters:
-      "Health is built in repeated ordinary moments, many of which happen when discipline is lowest.",
-    practicalApplication:
-      "Use grocery defaults, prepared workout clothes, sleep cues, walking anchors, and recovery routines.",
-    commonMistakes: [
-      "Planning for ideal energy",
-      "Leaving unhealthy cues visible",
-      "Making exercise require too much setup"
+      "Which domain of your life would change most if one keystone habit became reliable?",
+    exercises: [
+      "Select one domain: work, health, learning, money, or relationships.",
+      "Write the keystone behavior.",
+      "Design its cue, easy start, reward, and review."
     ],
-    misconceptions: [
-      {
-        misconception: "Health habits are mainly about discipline.",
-        correction:
-          "Discipline matters, but defaults, cues, and friction often decide the behavior."
-      }
-    ],
-    retentionAnchors: [
-      "Design for tired you.",
-      "Health defaults beat health intentions."
+    anchors: [
+      "Principles transfer; playbooks adapt.",
+      "Choose one domain and make one high-leverage behavior reliable."
     ],
     takeaways: [
-      "Prepare before vulnerable moments.",
-      "Make healthy cues visible.",
-      "Use friction to protect choices."
+      "Habit design applies across life domains.",
+      "Each domain requires contextual judgment.",
+      "Applied learning turns the book into behavior."
     ],
-    relatedSections: ["environment-design", "friction-convenience"]
-  },
-  {
-    id: "learning-application",
-    title: "Applying Atomic Habits to Learning",
-    eyebrow: "Application",
-    minutes: 12,
-    summary:
-      "Learning habits improve when study is cued, retrieval is built in, progress is visible, and review becomes a system.",
-    objectives: [
-      "Build a reading and retrieval habit",
-      "Use immediate feedback for long-term learning",
-      "Apply habit stacking to study"
+    examples: [
+      "Start work with a protected strategy block.",
+      "Use a prepared default meal to avoid low-energy food decisions.",
+      "Automate savings and review spending weekly.",
+      "Put the phone away during relational transitions."
     ],
-    concepts: ["retrieval practice", "study cues", "learning loops"],
-    thesis:
-      "Learning compounds when exposure becomes retrieval, reflection, and application. A reading habit that produces no recall may feel productive while leaving little behind. Habit design can turn learning into a loop that preserves understanding.",
-    nuance:
-      "The goal is not to make every reading session feel like school. The goal is to add just enough structure that attention becomes retained knowledge.",
-    mentalModel: {
-      name: "Read, recall, apply",
-      explanation:
-        "Learning becomes durable when input is followed by retrieval and practical use.",
-      useWhen:
-        "Use this when you consume ideas but cannot later use them."
-    },
-    scenario:
-      "A reader finishes many nonfiction books but cannot explain the core ideas a month later.",
-    defaultApproach:
-      "Read more books and hope retention improves.",
-    betterApproach:
-      "After each section, write three recall questions and one application sentence.",
-    whyItWorks:
-      "The habit converts reading into memory and usable insight.",
-    applicationContext: "How to build a reading habit that actually retains ideas",
-    applicationSteps: [
-      "Anchor reading to a stable routine",
-      "Stop after a section",
-      "Write one-sentence compression",
-      "Create three recall prompts",
-      "Apply one idea to a real situation"
-    ],
-    applicationResult:
-      "Reading produces retained mental models instead of vague familiarity.",
-    exerciseTitle: "Create a learning loop",
-    exerciseInstructions:
-      "For the next lesson you read, write recall prompts and one application.",
-    exercisePrompts: [
-      "What is the core idea?",
-      "What question would test recall?",
-      "Where can you apply this this week?"
-    ],
-    reflection:
-      "What are you consuming regularly without a habit that turns it into retained knowledge?",
-    whyThisMatters:
-      "Knowledge compression only matters if the compressed ideas remain usable.",
-    practicalApplication:
-      "Use section notes, retrieval prompts, spaced review, and application sentences after reading.",
-    commonMistakes: [
-      "Confusing familiarity with understanding",
-      "Highlighting without retrieval",
-      "Reading too long without pausing to consolidate"
-    ],
-    misconceptions: [
-      {
-        misconception: "More reading automatically means more learning.",
-        correction:
-          "Reading becomes learning when the mind retrieves, connects, and applies."
-      }
-    ],
-    retentionAnchors: [
-      "Input is not understanding until it can be recalled and used.",
-      "Read, recall, apply."
-    ],
-    takeaways: [
-      "Learning needs a feedback loop.",
-      "Retrieval improves retention.",
-      "Application makes ideas usable."
-    ],
-    relatedSections: ["habit-stacking", "habit-tracking-feedback"]
-  },
-  {
-    id: "money-application",
-    title: "Applying Atomic Habits to Money",
-    eyebrow: "Application",
-    minutes: 12,
-    summary:
-      "Money habits improve when saving, spending, review, and identity are designed into defaults before emotion enters the decision.",
-    objectives: [
-      "Apply identity-based habits to money",
-      "Use automation and friction for financial behavior",
-      "Build a weekly money review system"
-    ],
-    concepts: ["financial defaults", "saving identity", "spending friction"],
-    thesis:
-      "Financial behavior is a habit domain because money decisions repeat under emotion, status pressure, convenience, and uncertainty. A good money system makes the future-protecting behavior automatic and the impulsive behavior slower.",
-    nuance:
-      "Atomic Habits does not replace financial knowledge. It makes financial knowledge more executable. Knowing what to do is not enough if the environment makes the opposite easy.",
-    mentalModel: {
-      name: "Future-options identity",
-      explanation:
-        "Saving is not deprivation; it is repeated evidence that you protect future freedom.",
-      useWhen:
-        "Use this when saving feels like losing rather than buying options."
-    },
-    scenario:
-      "A professional earns well but saves inconsistently because spending is impulsive and visible.",
-    defaultApproach:
-      "Try to spend less after money is already in the checking account.",
-    betterApproach:
-      "Automate saving on payday, remove saved cards from shopping sites, and run a Friday money review.",
-    whyItWorks:
-      "The system makes saving the default and spending more deliberate.",
-    applicationContext: "How to apply identity-based habits to money",
-    applicationSteps: [
-      "Name the financial identity",
-      "Automate one proof behavior",
-      "Add friction to impulsive spending",
-      "Track progress visually",
-      "Review decisions weekly without shame"
-    ],
-    applicationResult:
-      "Money behavior becomes a designed loop rather than a series of emotional decisions.",
-    exerciseTitle: "Design one financial default",
-    exerciseInstructions:
-      "Create one automatic behavior that supports the financial identity you want.",
-    exercisePrompts: [
-      "What identity should money reinforce?",
-      "What action can happen automatically?",
-      "Where should friction be added?"
-    ],
-    reflection:
-      "What money behavior would be easier if it happened before discretionary spending became visible?",
-    whyThisMatters:
-      "Financial outcomes are deeply shaped by repeated defaults.",
-    practicalApplication:
-      "Use payday automation, waiting periods, spending friction, review rituals, and visible savings progress.",
-    commonMistakes: [
-      "Relying on restraint after money is already easy to spend",
-      "Using shame instead of review",
-      "Making saving invisible and spending vivid"
-    ],
-    misconceptions: [
-      {
-        misconception: "Money habits are just budgeting details.",
-        correction:
-          "They are repeated behaviors tied to identity, emotion, status, and future options."
-      }
-    ],
-    retentionAnchors: [
-      "Automate the future before impulse sees the money.",
-      "Saving is identity evidence for future freedom."
-    ],
-    takeaways: [
-      "Defaults shape financial behavior.",
-      "Friction protects against impulse.",
-      "Money reviews should produce learning, not shame."
-    ],
-    relatedSections: ["identity-based-behavior-change", "fourth-law-satisfying"]
-  },
-  {
-    id: "relationships-application",
-    title: "Applying Atomic Habits to Relationships",
-    eyebrow: "Application",
-    minutes: 11,
-    summary:
-      "Relationships are shaped by repeated cues of attention, repair, appreciation, and presence.",
-    objectives: [
-      "Apply habit design to connection",
-      "Build small rituals of attention",
-      "Use recovery habits after conflict or distance"
-    ],
-    concepts: ["relationship rituals", "attention cues", "repair habits"],
-    thesis:
-      "Relationships are not built only by major moments. They are built by repeated micro-behaviors: greeting, listening, following up, repairing, appreciating, and making attention visible. Habit design can make care more reliable.",
-    nuance:
-      "Relational habits should not become mechanical scripts. The point is to make attention available, not to automate sincerity. A good ritual creates space for presence.",
-    mentalModel: {
-      name: "Small bids",
-      explanation:
-        "Repeated small moments of attention teach a relationship what it can expect.",
-      useWhen:
-        "Use this when care is real but not consistently expressed."
-    },
-    scenario:
-      "A parent arrives home distracted and the first ten minutes set a disconnected tone.",
-    defaultApproach:
-      "Hope to reconnect later after checking the phone.",
-    betterApproach:
-      "Place the phone away at the door and give the first five minutes to greeting and listening.",
-    whyItWorks:
-      "The cue of arriving home triggers connection before distraction claims attention.",
-    applicationContext: "How to create a relationship attention ritual",
-    applicationSteps: [
-      "Identify a recurring transition",
-      "Remove the competing attention cue",
-      "Choose a small expression of presence",
-      "Repeat it consistently",
-      "Repair quickly when the ritual is missed"
-    ],
-    applicationResult:
-      "Connection becomes a default at important transition points.",
-    exerciseTitle: "Design one relational cue",
-    exerciseInstructions:
-      "Choose one recurring moment where a small behavior would express care.",
-    exercisePrompts: [
-      "What transition matters?",
-      "What competing cue steals attention?",
-      "What small action would communicate presence?"
-    ],
-    reflection:
-      "Where could a tiny repeated behavior make someone feel more consistently valued?",
-    whyThisMatters:
-      "Love and trust are often experienced through repeated behavior, not abstract intention.",
-    practicalApplication:
-      "Use greeting rituals, weekly check-ins, repair phrases, appreciation notes, and device boundaries.",
-    commonMistakes: [
-      "Assuming good intentions are obvious",
-      "Letting devices own relational transitions",
-      "Treating repair as optional after a missed moment"
-    ],
-    misconceptions: [
-      {
-        misconception: "Habits make relationships less authentic.",
-        correction:
-          "Good relational habits protect the conditions where authentic attention can happen."
-      }
-    ],
-    retentionAnchors: [
-      "Repeated attention teaches trust.",
-      "Make care visible in ordinary moments."
-    ],
-    takeaways: [
-      "Relationships compound through small behaviors.",
-      "Transitions are powerful connection cues.",
-      "Repair is a habit too."
-    ],
-    relatedSections: ["social-environment-imitation", "consistency-recovery"]
-  },
-  {
-    id: "common-misreadings",
-    title: "Common Misreadings of Atomic Habits",
-    eyebrow: "Nuance",
-    minutes: 12,
-    summary:
-      "The book is often flattened into slogans; the stronger reading treats habits as flexible systems, not moral judgments.",
-    objectives: [
-      "Avoid shallow interpretations",
-      "Preserve nuance around identity, systems, and tiny habits",
-      "Apply the framework without becoming rigid"
-    ],
-    concepts: ["misreadings", "nuance", "systems thinking"],
-    thesis:
-      "Atomic Habits is vulnerable to being simplified into motivational fragments: be one percent better, never miss, systems over goals. These phrases are useful only when connected to the deeper architecture of cues, cravings, responses, rewards, identity, and review.",
-    nuance:
-      "The best use of the book is compassionate precision. You are responsible for design, but not required to shame yourself for every failure. A miss is data. A bad habit is a loop. An identity is evidence, not a prison.",
-    mentalModel: {
-      name: "Compassionate engineering",
-      explanation:
-        "Treat behavior as designable without treating the person as defective.",
-      useWhen:
-        "Use this when habit change starts becoming harsh, rigid, or slogan-driven."
-    },
-    scenario:
-      "A reader uses never miss twice as a reason to feel guilty after missing twice.",
-    defaultApproach:
-      "Treat the rule as proof of personal failure.",
-    betterApproach:
-      "Treat the second miss as a signal to reduce the habit, redesign the cue, and return with a minimum version.",
-    whyItWorks:
-      "The rule becomes a recovery tool rather than a shame tool.",
-    applicationContext: "How to apply Atomic Habits without becoming rigid",
-    applicationSteps: [
-      "Translate slogans back into mechanisms",
-      "Use misses as data",
-      "Keep identities flexible",
-      "Prefer redesign over self-attack",
-      "Review whether the system fits your actual life"
-    ],
-    applicationResult:
-      "The framework becomes practical and humane instead of brittle.",
-    exerciseTitle: "Audit one slogan",
-    exerciseInstructions:
-      "Choose one habit slogan and translate it into a practical mechanism.",
-    exercisePrompts: [
-      "What phrase are you repeating?",
-      "What mechanism does it point to?",
-      "How could it be misused?"
-    ],
-    reflection:
-      "Where have you turned a useful habit principle into a harsh rule?",
-    whyThisMatters:
-      "A shallow reading can create pressure without producing better design.",
-    practicalApplication:
-      "When a habit principle feels judgmental, ask what cue, friction, reward, or identity evidence it is actually asking you to redesign.",
-    commonMistakes: [
-      "Turning tiny habits into low standards forever",
-      "Turning identity into a rigid label",
-      "Treating systems over goals as goals do not matter",
-      "Using tracking as self-surveillance"
-    ],
-    misconceptions: [
-      {
-        misconception: "Atomic Habits is about becoming perfectly optimized.",
-        correction:
-          "It is about designing repeatable behavior that supports the life and identity you value."
-      }
-    ],
-    retentionAnchors: [
-      "Translate slogans into systems.",
-      "Use the framework to redesign, not to shame."
-    ],
-    takeaways: [
-      "Mechanisms matter more than slogans.",
-      "A humane system is more durable.",
-      "Nuance prevents brittleness."
-    ],
-    relatedSections: ["advanced-habit-design", "consistency-recovery"]
-  },
-  {
+    relatedSections: ["advanced-habit-design", "final-synthesis-blueprint"]
+  }),
+  chapter({
     id: "final-synthesis-blueprint",
     title: "Final Synthesis and Implementation Blueprint",
-    eyebrow: "Blueprint",
-    minutes: 15,
+    eyebrow: "Synthesis",
+    minutes: 36,
     summary:
-      "The complete method is to choose one identity-relevant behavior, design the loop through the four laws, track it lightly, and review it with curiosity.",
+      "The book compresses into a practical blueprint: choose an identity-relevant behavior, design the loop, make it repeatable, and review it as evidence accumulates.",
     objectives: [
-      "Synthesize the full framework",
-      "Build a complete habit design blueprint",
-      "Leave with one practical implementation plan"
+      "Synthesize the major ideas of the curriculum",
+      "Build one complete habit implementation plan",
+      "Leave with a practical system rather than inspiration alone"
     ],
-    concepts: ["blueprint", "synthesis", "implementation"],
-    thesis:
-      "Atomic Habits compresses into a practical design loop: choose the identity, define the behavior, make the cue obvious, make the habit attractive, make the response easy, make the reward satisfying, and review the system as evidence accumulates.",
-    nuance:
-      "The blueprint works best when it is focused. One well-designed habit can teach the entire method. Trying to redesign life all at once usually creates complexity before the first loop is reliable.",
-    mentalModel: {
-      name: "One-loop mastery",
-      explanation:
-        "Master one complete habit loop before multiplying habits.",
-      useWhen:
-        "Use this when you feel inspired to change everything after learning the framework."
-    },
-    scenario:
-      "A reader finishes the curriculum and wants to improve health, money, learning, and work immediately.",
-    defaultApproach:
-      "Create a large plan with many simultaneous routines.",
-    betterApproach:
-      "Choose one keystone habit, design it through the four laws, and review it for four weeks.",
-    whyItWorks:
-      "A focused implementation creates learning and confidence before scaling.",
-    applicationContext: "How to build your Atomic Habits implementation plan",
-    applicationSteps: [
-      "Choose one keystone behavior",
-      "Write the identity it supports",
-      "Map cue, craving, response, and reward",
-      "Apply the four laws and inverse laws",
-      "Create a minimum version and recovery rule",
-      "Track one leading indicator",
-      "Review weekly for four weeks"
+    concepts: ["implementation blueprint", "review", "identity", "four laws"],
+    body: [
+      "Atomic Habits is best understood as a system for making important behaviors repeatable. The book is not merely saying that small actions matter. It is showing how identity, cues, cravings, friction, rewards, environment, and review combine to shape what people do repeatedly.",
+      "The final synthesis begins with identity. Who are you practicing becoming? That question prevents the habit from becoming a disconnected task. Then define the behavior that would provide evidence for that identity. Keep it small enough to repeat under real conditions. A habit that cannot survive ordinary life is not yet designed.",
+      "Next, map the loop. What cue will make the behavior obvious? What will make it attractive enough to approach? How will you make the first step easy? What immediate satisfaction will reinforce it? These questions turn the four laws into a design checklist rather than a set of slogans.",
+      "Then plan for failure before it happens. What is the minimum version? What will you do after one miss? What friction should be added to the competing habit? What will you review weekly? This is where many habit systems become mature. They stop depending on the fantasy of perfect conditions.",
+      "Finally, keep the system small long enough to learn from it. The temptation after understanding the framework is to redesign everything. Resist that. Choose one keystone behavior and run the system for four weeks. Watch what happens. Adjust one variable at a time. Let the habit teach you how your real life works.",
+      "The goal of this curriculum is not to make you admire the idea of habits. It is to help you understand the book well enough to design behavior. The proof is not whether the framework sounds elegant. The proof is whether the next repeated action becomes clearer, easier, and more aligned with the person you want to become."
     ],
-    applicationResult:
-      "The reader leaves with a system, not just understanding.",
-    exerciseTitle: "Complete the habit blueprint",
-    exerciseInstructions:
-      "Design one habit from identity through review. Keep it small enough to execute this week.",
-    exercisePrompts: [
-      "Identity: I am becoming someone who...",
-      "Cue: the habit starts when...",
-      "Response: the minimum action is...",
-      "Reward: the immediate satisfaction is...",
-      "Review: each week I will ask..."
+    support: [
+      {
+        type: "framework",
+        title: "The complete habit blueprint",
+        stages: [
+          {
+            name: "Identity",
+            description: "Name the kind of person the habit helps you become."
+          },
+          {
+            name: "Behavior",
+            description: "Choose the smallest serious action that provides evidence."
+          },
+          {
+            name: "Loop",
+            description: "Design cue, craving, response, and reward through the four laws."
+          },
+          {
+            name: "Recovery",
+            description: "Define the minimum version and the rule after a miss."
+          },
+          {
+            name: "Review",
+            description: "Check the leading behavior weekly and adjust one variable at a time."
+          }
+        ]
+      },
+      {
+        type: "exercise",
+        title: "Build your implementation blueprint",
+        instructions:
+          "Design one habit from identity through weekly review. Keep it narrow enough to begin this week.",
+        prompts: [
+          "Identity: I am becoming someone who...",
+          "Cue: this starts when...",
+          "Easy response: the minimum action is...",
+          "Reward: the immediate satisfaction is...",
+          "Review: each week I will ask..."
+        ]
+      },
+      {
+        type: "synthesis",
+        title: "Final compression",
+        text: "Make the right behavior obvious, attractive, easy, and satisfying. Make the wrong behavior invisible, unattractive, difficult, and unsatisfying. Use identity for direction, systems for repetition, and review for adaptation."
+      }
     ],
-    reflection:
-      "What is the one habit that would make the next season of your life easier, clearer, or more aligned?",
     whyThisMatters:
       "Understanding becomes valuable when it changes the next repeated action.",
     practicalApplication:
-      "Use the blueprint as a reusable template for future books, skills, and life domains.",
+      "Complete one habit blueprint and run it for four weeks before adding another major behavior.",
     commonMistakes: [
-      "Leaving the curriculum with inspiration but no system",
-      "Choosing a habit too large for the first week",
-      "Skipping the review loop",
-      "Changing too many variables before learning from the first design"
+      "Leaving with inspiration but no designed system",
+      "Trying to change too many habits at once",
+      "Skipping recovery and review because the launch feels exciting"
     ],
     misconceptions: [
       {
-        misconception: "The final step is motivation.",
+        misconception: "The final step is to feel motivated.",
         correction:
-          "The final step is a designed system that makes the next repetition clear."
+          "The final step is to design a system that makes the next repetition clear under ordinary conditions."
       }
     ],
-    retentionAnchors: [
-      "Identity, cue, craving, response, reward, review.",
-      "Design one loop. Run it. Learn. Then scale."
+    reflection:
+      "What is the one habit that would make the next season of your life easier, clearer, or more aligned?",
+    exercises: [
+      "Complete the habit blueprint.",
+      "Schedule the first week of repetitions.",
+      "Set a review appointment four weeks from now."
+    ],
+    anchors: [
+      "Design one loop. Run it. Learn. Then scale.",
+      "Identity gives direction; systems create repetition; review keeps the system alive."
     ],
     takeaways: [
-      "A complete habit has identity, cue, response, reward, and review.",
-      "Start with one keystone behavior.",
-      "The framework is reusable across domains."
+      "Atomic Habits is a behavior design framework.",
+      "The four laws map to the habit loop.",
+      "A mature habit system includes recovery and review."
     ],
-    relatedSections: ["core-thesis", "advanced-habit-design"]
-  }
+    examples: [
+      "A reading habit becomes identity, cue, easy start, note reward, and weekly review.",
+      "A money habit becomes payday automation, spending friction, visible progress, and a Friday check-in.",
+      "A health habit becomes prepared cues, a two-minute start, aligned reward, and a recovery rule."
+    ],
+    relatedSections: ["real-power-small-habits", "advanced-habit-design"]
+  })
 ];
-
-const atomicSections = definitions.map(lesson);
 
 export const atomicHabits: Book = {
   slug: "atomic-habits",
@@ -2725,36 +1251,36 @@ export const atomicHabits: Book = {
   author: "James Clear",
   category: "Behavioral Design",
   difficulty: "Foundational",
-  completionTime: "6h 15m",
+  completionTime: "6h 10m",
   progress: 34,
   coverTone:
     "from-stone-200 via-amber-100 to-emerald-100 dark:from-stone-800 dark:via-amber-900/40 dark:to-emerald-900/40",
   description:
-    "A deep curriculum on identity, systems, environment design, habit loops, and the behavioral mechanics behind lasting change.",
+    "A prose-first curriculum on identity, habit loops, the four laws of behavior change, systems, and real-life habit design.",
   featured: true,
   readingEstimateMinutes: estimateSectionsMinutes(atomicSections),
-  curriculumVersion: "1.1",
+  curriculumVersion: "1.2",
   primaryThemes: [
     "identity-based change",
-    "behavioral design",
-    "environment and friction",
-    "compounding",
-    "practical implementation"
+    "habit loops",
+    "the four laws",
+    "systems over goals",
+    "applied behavior design"
   ],
   intendedOutcomes: [
-    "Understand the four laws of behavior change as a diagnostic system",
-    "Design good habits that are obvious, attractive, easy, and satisfying",
-    "Break bad habits by changing cues, friction, appeal, and rewards",
-    "Convert goals into repeatable systems",
-    "Build a personal habit blueprint for work, health, learning, money, or relationships"
+    "Understand why small habits compound into meaningful outcomes",
+    "Use identity as evidence-based behavior change rather than empty affirmation",
+    "Diagnose habits through cue, craving, response, and reward",
+    "Apply the four laws to build good habits and break bad ones",
+    "Create a practical implementation blueprint for one real habit"
   ],
   promise:
-    "After this curriculum, you will understand how habits form, why small behaviors compound, how identity shapes repetition, and how to design practical systems that survive real life.",
+    "After this curriculum, you will understand the major ideas of Atomic Habits, how they connect, why they matter, and how to apply them as a practical system for behavior change.",
   recommendedAudience: [
-    "Readers who want practical behavior change",
-    "Professionals building better work systems",
+    "Readers who want a deep grasp of Atomic Habits",
+    "Professionals designing better work systems",
     "Students and lifelong learners",
-    "Anyone trying to make good habits easier and bad habits harder"
+    "Anyone building healthier routines without shallow motivation"
   ],
   sourceNotes:
     "Original transformed curriculum based on the book's public concepts and behavioral-change framework. It does not reproduce long passages or chapter text.",

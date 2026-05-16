@@ -325,30 +325,6 @@ export function CurriculumReader({ book }: { book: Book }) {
                   ))}
                 </div>
 
-                <div className="mt-8 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-md border border-border bg-card/60 p-5">
-                    <h3 className="font-serif text-2xl font-semibold">
-                      Learning Objectives
-                    </h3>
-                    <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-                      {section.learningObjectives.map((objective) => (
-                        <li key={objective} className="flex gap-3">
-                          <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
-                          <span>{objective}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="rounded-md border border-border bg-card/60 p-5">
-                    <h3 className="font-serif text-2xl font-semibold">
-                      Why It Matters
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                      {section.whyThisMatters}
-                    </p>
-                  </div>
-                </div>
-
                 <ContentRenderer
                   blocks={section.blocks}
                   storagePrefix={`curriculum:${book.slug}:${section.id}`}
@@ -374,6 +350,30 @@ export function CurriculumReader({ book }: { book: Book }) {
                     ) : null}
                   </div>
                 ))}
+
+                <div className="mt-10 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-md border border-border bg-card/60 p-5">
+                    <h3 className="font-serif text-2xl font-semibold">
+                      Learning Objectives
+                    </h3>
+                    <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+                      {section.learningObjectives.map((objective) => (
+                        <li key={objective} className="flex gap-3">
+                          <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
+                          <span>{objective}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-md border border-border bg-card/60 p-5">
+                    <h3 className="font-serif text-2xl font-semibold">
+                      Why It Matters
+                    </h3>
+                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                      {section.whyThisMatters}
+                    </p>
+                  </div>
+                </div>
 
                 <div className="mt-10 grid gap-5 md:grid-cols-2">
                   <div className="rounded-md border border-border bg-card/65 p-5">
