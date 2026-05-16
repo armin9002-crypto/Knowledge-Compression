@@ -14,6 +14,7 @@ import {
   Target
 } from "lucide-react";
 import { ContentRenderer } from "@/components/content-renderer";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { Book } from "@/lib/types";
@@ -126,18 +127,21 @@ export function CurriculumReader({ book }: { book: Book }) {
     <main className="min-h-screen bg-background">
       <div className="border-b border-border bg-card/40">
         <div className="container py-7">
-          <Button asChild variant="ghost" size="sm" className="-ml-3 mb-4">
-            <Link href="/library">
-              <ChevronLeft className="h-4 w-4" />
-              Library
-            </Link>
-          </Button>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <Button asChild variant="ghost" size="sm" className="-ml-3">
+              <Link href="/library">
+                <ChevronLeft className="h-4 w-4" />
+                Library
+              </Link>
+            </Button>
+            <ThemeToggle />
+          </div>
           <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
             <div>
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                 {book.category} / {book.difficulty}
               </p>
-              <h1 className="mt-3 font-serif text-5xl font-semibold tracking-normal md:text-7xl">
+              <h1 className="mt-3 font-serif text-4xl font-semibold tracking-normal sm:text-5xl md:text-7xl">
                 {book.title}
               </h1>
               <p className="mt-4 max-w-3xl text-lg leading-8 text-muted-foreground">
@@ -221,7 +225,7 @@ export function CurriculumReader({ book }: { book: Book }) {
         </div>
       </div>
 
-      <div className="container grid gap-10 py-8 lg:grid-cols-[270px_minmax(0,800px)] lg:py-14 xl:grid-cols-[270px_minmax(0,800px)_200px]">
+      <div className="container grid gap-8 py-8 lg:grid-cols-[270px_minmax(0,800px)] lg:gap-10 lg:py-14 xl:grid-cols-[270px_minmax(0,800px)_200px]">
         <aside
           className={cn(
             "lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto lg:pr-1",
@@ -326,12 +330,12 @@ export function CurriculumReader({ book }: { book: Book }) {
                     {section.estimatedMinutes} min read
                   </span>
                 </div>
-                <div className="flex items-start justify-between gap-5 border-b border-border/70 pb-8">
+                <div className="flex items-start justify-between gap-5 border-b border-border/70 pb-7 md:pb-8">
                   <div>
-                    <h2 className="max-w-3xl font-serif text-5xl font-semibold leading-[1.02] tracking-normal md:text-6xl">
+                    <h2 className="max-w-3xl font-serif text-4xl font-semibold leading-[1.04] tracking-normal sm:text-5xl md:text-6xl">
                       {section.title}
                     </h2>
-                    <p className="mt-5 max-w-3xl font-serif text-2xl leading-9 text-muted-foreground md:text-[1.7rem] md:leading-10">
+                    <p className="mt-5 max-w-3xl font-serif text-xl leading-8 text-muted-foreground md:text-[1.7rem] md:leading-10">
                       {section.summary}
                     </p>
                   </div>
@@ -392,7 +396,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 ))}
 
-                <div className="mt-12 grid gap-4 md:grid-cols-2">
+                <div className="mt-10 grid gap-4 md:mt-12 md:grid-cols-2">
                   <div className="rounded-md border border-border bg-card/45 p-5">
                     <h3 className="font-serif text-2xl font-semibold">
                       Learning Objectives
@@ -416,7 +420,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 </div>
 
-                <div className="mt-8 grid gap-5 md:grid-cols-2">
+                <div className="mt-6 grid gap-5 md:mt-8 md:grid-cols-2">
                   <div className="rounded-md border border-border bg-card/45 p-5">
                     <h3 className="font-serif text-2xl font-semibold">
                       Applied Examples

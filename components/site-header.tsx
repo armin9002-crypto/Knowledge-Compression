@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { BookOpen, Library, Sparkles } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/82 backdrop-blur-xl">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
+      <div className="container flex h-16 items-center justify-between gap-3">
+        <Link href="/" className="flex min-w-0 items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card">
             <BookOpen className="h-4 w-4" />
           </span>
-          <span className="font-serif text-xl font-semibold">Curriculum</span>
+          <span className="truncate font-serif text-xl font-semibold">
+            Curriculum
+          </span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <Link href="/library" className="transition-colors hover:text-foreground">
@@ -23,7 +26,9 @@ export function SiteHeader() {
             Preview
           </Link>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle compact className="sm:hidden" />
+          <ThemeToggle className="hidden sm:inline-flex" />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link href="/library">
               <Library className="h-4 w-4" />

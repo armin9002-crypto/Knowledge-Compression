@@ -8,16 +8,16 @@ export default function LibraryPage() {
   return (
     <>
       <SiteHeader />
-      <main className="container py-14">
+      <main className="container py-10 md:py-14">
         <div className="mb-10 grid gap-8 lg:grid-cols-[1fr_380px] lg:items-end">
           <div>
             <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
               Library
             </p>
-            <h1 className="mt-4 font-serif text-6xl font-semibold tracking-normal md:text-7xl">
+            <h1 className="mt-4 font-serif text-4xl font-semibold tracking-normal sm:text-5xl md:text-7xl">
               Compressed curricula for enduring ideas.
             </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-muted-foreground">
+            <p className="mt-6 max-w-3xl text-base leading-7 text-muted-foreground md:text-lg md:leading-8">
               A growing catalog of nonfiction modules built for depth,
               comprehension, and long-form retention.
             </p>

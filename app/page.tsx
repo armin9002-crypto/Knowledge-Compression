@@ -44,17 +44,17 @@ export default function Home() {
       <main>
         <section className="relative overflow-hidden border-b border-border">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(84,143,135,0.18),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
-          <div className="container relative grid min-h-[calc(100vh-4rem)] gap-12 py-20 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
+          <div className="container relative grid min-h-[calc(100vh-4rem)] gap-12 py-14 md:py-20 lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
             <FadeIn>
               <div>
                 <p className="mb-5 inline-flex items-center gap-2 rounded-md border border-border bg-card/60 px-3 py-1.5 text-sm text-muted-foreground">
                   <GraduationCap className="h-4 w-4" />
                   Deep learning from great nonfiction
                 </p>
-                <h1 className="max-w-4xl font-serif text-6xl font-semibold leading-[0.95] tracking-normal md:text-8xl">
+                <h1 className="max-w-4xl font-serif text-5xl font-semibold leading-[0.98] tracking-normal sm:text-6xl md:text-8xl">
                   Master the world&apos;s best ideas.
                 </h1>
-                <p className="mt-7 max-w-2xl text-xl leading-9 text-muted-foreground">
+                <p className="mt-7 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl md:leading-9">
                   Curriculum transforms important nonfiction into comprehensive
                   compressed courses: readable, structured, retained, and worthy
                   of serious attention.
@@ -108,13 +108,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="philosophy" className="border-b border-border py-24">
+        <section id="philosophy" className="border-b border-border py-16 md:py-24">
           <div className="container">
             <FadeIn className="mx-auto max-w-3xl text-center">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                 Product philosophy
               </p>
-              <h2 className="mt-4 font-serif text-5xl font-semibold">
+              <h2 className="mt-4 font-serif text-4xl font-semibold md:text-5xl">
                 Not summaries. Compressed curricula.
               </h2>
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
@@ -143,13 +143,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="preview" className="border-b border-border py-24">
+        <section id="preview" className="border-b border-border py-16 md:py-24">
           <div className="container grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <FadeIn>
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                 Reading experience
               </p>
-              <h2 className="mt-4 font-serif text-5xl font-semibold">
+              <h2 className="mt-4 font-serif text-4xl font-semibold md:text-5xl">
                 Built for long-form understanding.
               </h2>
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
@@ -216,14 +216,14 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-24">
+        <section className="py-16 md:py-24">
           <div className="container">
             <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                   Featured library
                 </p>
-                <h2 className="mt-4 font-serif text-5xl font-semibold">
+                <h2 className="mt-4 font-serif text-4xl font-semibold md:text-5xl">
                   Serious books, designed for study.
                 </h2>
               </div>
