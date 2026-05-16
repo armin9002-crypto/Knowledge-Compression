@@ -7,10 +7,12 @@ import {
   CheckCircle2,
   ChevronLeft,
   Clock,
+  GraduationCap,
   Highlighter,
   Layers,
   ListTree,
   Menu,
+  PlayCircle,
   Target
 } from "lucide-react";
 import { ContentRenderer } from "@/components/content-renderer";
@@ -128,6 +130,11 @@ export function CurriculumReader({ book }: { book: Book }) {
     progressSummary.nextSection.id !== progressSummary.currentSection?.id
       ? "Next lesson"
       : "Current lesson";
+  const primaryActionLabel = progressSummary.isComplete
+    ? "Review curriculum"
+    : progressSummary.hasStarted
+      ? "Continue reading"
+      : "Start curriculum";
 
   const activeTopLevelSection = useMemo(() => {
     return (
@@ -293,7 +300,7 @@ export function CurriculumReader({ book }: { book: Book }) {
               <ThemeToggle />
             </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-end xl:grid-cols-[1fr_320px]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end xl:grid-cols-[minmax(0,1fr)_360px]">
             <div>
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                 {book.category} / {book.difficulty}
@@ -301,9 +308,23 @@ export function CurriculumReader({ book }: { book: Book }) {
               <h1 className="mt-3 font-serif text-[clamp(2.4rem,1.75rem+2.8vw,4.45rem)] font-semibold leading-[0.98] tracking-normal">
                 {book.title}
               </h1>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {book.author}
+              </p>
               <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground md:text-lg md:leading-8">
                 {book.description}
               </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-sm text-muted-foreground">
+                <span className="rounded-md border border-border bg-card/55 px-3 py-1.5">
+                  {book.completionTime}
+                </span>
+                <span className="rounded-md border border-border bg-card/55 px-3 py-1.5">
+                  {book.sections.length} lessons
+                </span>
+                <span className="rounded-md border border-border bg-card/55 px-3 py-1.5">
+                  {book.difficulty}
+                </span>
+              </div>
             </div>
             <div className="rounded-md border border-border bg-background/55 p-4">
               <div className="mb-3 flex items-center justify-between text-sm">
@@ -333,12 +354,24 @@ export function CurriculumReader({ book }: { book: Book }) {
                 {progressSummary.hasStarted && overviewSection ? (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="default"
                     size="sm"
                     className="mt-4 w-full"
                     onClick={() => scrollToSection(overviewSection.id)}
                   >
-                    {overviewActionLabel}
+                    <PlayCircle className="h-4 w-4" />
+                    {primaryActionLabel}
+                  </Button>
+                ) : overviewSection ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={() => scrollToSection(overviewSection.id)}
+                  >
+                    <PlayCircle className="h-4 w-4" />
+                    {primaryActionLabel}
                   </Button>
                 ) : null}
               </div>
@@ -349,7 +382,7 @@ export function CurriculumReader({ book }: { book: Book }) {
             <div className="rounded-md border border-border bg-background/55 p-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Target className="h-4 w-4" />
-                What this curriculum teaches
+                What you will understand
               </div>
               <p className="font-serif text-[clamp(1.45rem,1.18rem+0.75vw,1.85rem)] leading-[1.28] text-foreground">
                 {book.promise}
@@ -358,9 +391,10 @@ export function CurriculumReader({ book }: { book: Book }) {
                 {book.intendedOutcomes.map((outcome) => (
                   <div
                     key={outcome}
-                    className="rounded-md border border-border/70 bg-card/55 p-3 text-sm leading-6 text-muted-foreground"
+                    className="flex gap-3 rounded-md border border-border/70 bg-card/55 p-3 text-sm leading-6 text-muted-foreground"
                   >
-                    {outcome}
+                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
+                    <span>{outcome}</span>
                   </div>
                 ))}
               </div>
@@ -393,6 +427,59 @@ export function CurriculumReader({ book }: { book: Book }) {
                   {book.sourceNotes}
                 </p>
               ) : null}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-md border border-border bg-background/55 p-5">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <GraduationCap className="h-4 w-4" />
+                  Lesson preview
+                </div>
+                <h2 className="mt-2 font-serif text-2xl font-semibold md:text-3xl">
+                  Curriculum map
+                </h2>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {progressSummary.completedCount} of {progressSummary.totalLessons} lessons complete
+              </p>
+            </div>
+            <div className="grid gap-2">
+              {book.sections.map((section, index) => {
+                const done = readerState.completed.includes(section.id);
+                const current = overviewSection?.id === section.id;
+                return (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    className={cn(
+                      "grid gap-3 rounded-md border border-border/70 bg-card/45 p-3 transition-colors hover:bg-secondary/45 sm:grid-cols-[3.5rem_minmax(0,1fr)_6rem] sm:items-start",
+                      current ? "border-accent/55 bg-accent/10" : ""
+                    )}
+                  >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-xs text-muted-foreground">
+                      {done ? (
+                        <CheckCircle2 className="h-4 w-4 text-accent-foreground" />
+                      ) : (
+                        String(index + 1).padStart(2, "0")
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-serif text-lg font-semibold leading-6 text-foreground">
+                        {section.title}
+                      </span>
+                      <span className="mt-1 line-clamp-2 block text-sm leading-6 text-muted-foreground">
+                        {section.summary}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground sm:justify-end">
+                      <Clock className="h-3.5 w-3.5" />
+                      {section.estimatedMinutes} min
+                    </span>
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -543,6 +630,27 @@ export function CurriculumReader({ book }: { book: Book }) {
                   ))}
                 </div>
 
+                <div className="mt-8 rounded-md border border-border bg-card/45 p-4 md:p-5">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Target className="h-4 w-4" />
+                    In this lesson
+                  </div>
+                  <p className="text-sm leading-7 text-muted-foreground">
+                    {section.summary}
+                  </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {section.learningObjectives.slice(0, 4).map((objective) => (
+                      <div
+                        key={objective}
+                        className="flex gap-3 rounded-md border border-border/70 bg-background/45 p-3 text-sm leading-6 text-muted-foreground"
+                      >
+                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
+                        <span>{objective}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <ContentRenderer
                   blocks={section.blocks}
                   storagePrefix={`curriculum:${book.slug}:${section.id}`}
@@ -623,24 +731,35 @@ export function CurriculumReader({ book }: { book: Book }) {
                   <p className="mt-3 text-sm leading-7 text-muted-foreground">
                     {section.practicalApplication}
                   </p>
-                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                  <div className="mt-5">
                     <div>
                       <p className="text-sm font-medium">Common mistakes</p>
-                      <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
+                      <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
                         {section.commonMistakes.map((mistake) => (
-                          <li key={mistake}>{mistake}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Section takeaways</p>
-                      <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-                        {section.takeaways.map((takeaway) => (
-                          <li key={takeaway}>{takeaway}</li>
+                          <li
+                            key={mistake}
+                            className="rounded-md border border-border/70 bg-background/45 p-3"
+                          >
+                            {mistake}
+                          </li>
                         ))}
                       </ul>
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-5 rounded-md border border-accent/35 bg-accent/10 p-4 md:p-5">
+                  <h3 className="font-serif text-xl font-semibold md:text-2xl">
+                    What to remember
+                  </h3>
+                  <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+                    {section.takeaways.map((takeaway) => (
+                      <li key={takeaway} className="flex gap-3">
+                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
+                        <span>{takeaway}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-2">
@@ -675,11 +794,24 @@ export function CurriculumReader({ book }: { book: Book }) {
 
         <aside className="hidden xl:block">
           <div className="sticky top-24 rounded-md border border-border bg-card/50 p-4">
-            <p className="text-sm font-medium">Reading State</p>
-            <div className="mt-4 space-y-4 text-sm text-muted-foreground">
+            <p className="text-sm font-medium">Study state</p>
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span>Book progress</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-1.5" />
+            </div>
+            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
               <div className="flex justify-between">
-                <span>Completed</span>
-                <span>{readerState.completed.length}</span>
+                <span>Completed lessons</span>
+                <span>
+                  {progressSummary.completedCount}/{progressSummary.totalLessons}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span>Remaining</span>
+                <span>{formatMinutes(progressSummary.estimatedRemainingMinutes)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Bookmarks</span>
@@ -689,14 +821,33 @@ export function CurriculumReader({ book }: { book: Book }) {
                 <span>Highlights</span>
                 <span>{readerState.highlights.length}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-3">
                 <span>Version</span>
                 <span>{book.curriculumVersion}</span>
               </div>
             </div>
-            <p className="mt-5 text-xs leading-5 text-muted-foreground">
-              Saved locally on this device so the library can remember where
-              you left off.
+            <div className="mt-5 border-t border-border/70 pt-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                {overviewSectionLabel}
+              </p>
+              <p className="mt-2 line-clamp-3 font-serif text-lg font-semibold leading-6">
+                {overviewSection?.title || activeTopLevelSection?.title}
+              </p>
+              {overviewSection ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
+                  onClick={() => scrollToSection(overviewSection.id)}
+                >
+                  {overviewActionLabel}
+                </Button>
+              ) : null}
+            </div>
+            <p className="mt-4 text-xs leading-5 text-muted-foreground">
+              Progress, bookmarks, and highlights are saved locally on this
+              device.
             </p>
           </div>
         </aside>
