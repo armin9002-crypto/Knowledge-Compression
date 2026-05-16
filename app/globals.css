@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 42 28% 96%;
+    --foreground: 212 24% 10%;
+    --card: 42 30% 98%;
+    --card-foreground: 212 24% 10%;
+    --primary: 212 24% 10%;
+    --primary-foreground: 42 28% 96%;
+    --secondary: 42 18% 89%;
+    --secondary-foreground: 212 22% 14%;
+    --muted: 42 19% 90%;
+    --muted-foreground: 214 11% 42%;
+    --accent: 158 18% 82%;
+    --accent-foreground: 186 26% 13%;
+    --border: 42 15% 82%;
+    --input: 42 15% 82%;
+    --ring: 176 32% 34%;
+  }
+
+  .dark {
+    --background: 213 22% 7%;
+    --foreground: 42 23% 93%;
+    --card: 213 21% 10%;
+    --card-foreground: 42 23% 93%;
+    --primary: 42 28% 91%;
+    --primary-foreground: 213 22% 8%;
+    --secondary: 213 16% 15%;
+    --secondary-foreground: 42 23% 88%;
+    --muted: 213 15% 16%;
+    --muted-foreground: 42 10% 63%;
+    --accent: 176 22% 22%;
+    --accent-foreground: 42 28% 92%;
+    --border: 213 15% 20%;
+    --input: 213 15% 20%;
+    --ring: 176 32% 44%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+}
+
+@layer components {
+  .editorial-prose {
+    @apply text-[1.08rem] leading-8 text-foreground/85 md:text-[1.14rem] md:leading-9;
+  }
+
+  .editorial-prose p {
+    @apply my-6;
+  }
+
+  .editorial-prose strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .glass-panel {
+    @apply border border-white/10 bg-card/75 backdrop-blur-xl;
+  }
+}
