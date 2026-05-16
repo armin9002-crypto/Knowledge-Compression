@@ -52,7 +52,7 @@ export default function Home() {
                   Deep learning from great nonfiction
                 </p>
                 <h1 className="max-w-4xl font-serif text-6xl font-semibold leading-[0.95] tracking-normal md:text-8xl">
-                  Master the world's best ideas.
+                  Master the world&apos;s best ideas.
                 </h1>
                 <p className="mt-7 max-w-2xl text-xl leading-9 text-muted-foreground">
                   Curriculum transforms important nonfiction into comprehensive

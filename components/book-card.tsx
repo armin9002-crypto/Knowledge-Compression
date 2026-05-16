@@ -32,7 +32,9 @@ export function BookCard({ book }: { book: Book }) {
           {book.description}
         </p>
         <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
-          <span>{book.category}</span>
+          <span>
+            {book.category} / {book.difficulty}
+          </span>
           <span className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
             {book.completionTime}

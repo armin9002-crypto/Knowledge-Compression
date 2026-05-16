@@ -1,22 +1,152 @@
-import type { ContentBlock } from "@/lib/types";
+"use client";
 
-export function ContentRenderer({ blocks }: { blocks: ContentBlock[] }) {
+import { useEffect, useState } from "react";
+import {
+  AlertTriangle,
+  Brain,
+  Check,
+  ClipboardCheck,
+  GitCompare,
+  Lightbulb,
+  MessageSquareText,
+  PenLine,
+  Sparkles,
+  Target,
+  Workflow
+} from "lucide-react";
+import type { ContentBlock } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+function ReflectionField({
+  storageId,
+  question,
+  helperText
+}: {
+  storageId: string;
+  question: string;
+  helperText?: string;
+}) {
+  const [value, setValue] = useState("");
+
+  useEffect(() => {
+    setValue(window.localStorage.getItem(storageId) || "");
+  }, [storageId]);
+
+  useEffect(() => {
+    window.localStorage.setItem(storageId, value);
+  }, [storageId, value]);
+
+  return (
+    <div className="my-8 rounded-md border border-border bg-card/70 p-5">
+      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <MessageSquareText className="h-4 w-4" />
+        Reflection
+      </div>
+      <p className="mb-0 mt-4 font-serif text-2xl leading-8 text-foreground">
+        {question}
+      </p>
+      {helperText ? (
+        <p className="mb-0 mt-2 text-sm leading-6 text-muted-foreground">
+          {helperText}
+        </p>
+      ) : null}
+      <textarea
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder="Write a private study note..."
+        className="mt-5 min-h-28 w-full resize-y rounded-md border border-border bg-background/70 p-4 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-accent"
+      />
+    </div>
+  );
+}
+
+function NumberedCards({
+  title,
+  items,
+  ordered = false
+}: {
+  title?: string;
+  items: string[];
+  ordered?: boolean;
+}) {
+  return (
+    <div className="my-7 rounded-md border border-border bg-secondary/20 p-5">
+      {title ? (
+        <p className="my-0 mb-4 text-sm font-medium text-muted-foreground">
+          {title}
+        </p>
+      ) : null}
+      <div className="space-y-3">
+        {items.map((item, index) => (
+          <div key={item} className="flex gap-3">
+            <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-background text-xs text-muted-foreground">
+              {ordered ? index + 1 : <Check className="h-3.5 w-3.5" />}
+            </span>
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ContentRenderer({
+  blocks,
+  storagePrefix = "curriculum"
+}: {
+  blocks: ContentBlock[];
+  storagePrefix?: string;
+}) {
   return (
     <div className="editorial-prose">
       {blocks.map((block, index) => {
+        const key = block.id || `${block.type}-${index}`;
+
         if (block.type === "paragraph") {
-          return <p key={index}>{block.text}</p>;
+          return <p key={key}>{block.text}</p>;
         }
 
-        if (block.type === "callout") {
+        if (block.type === "heading") {
+          return (
+            <div key={key} className="mb-4 mt-10">
+              {block.eyebrow ? (
+                <p className="my-0 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {block.eyebrow}
+                </p>
+              ) : null}
+              <h3 className="mt-2 font-serif text-3xl font-semibold">
+                {block.title}
+              </h3>
+            </div>
+          );
+        }
+
+        if (
+          block.type === "callout" ||
+          block.type === "quoteStyleInsight" ||
+          block.type === "synthesis" ||
+          block.type === "warning"
+        ) {
+          const Icon =
+            block.type === "warning"
+              ? AlertTriangle
+              : block.type === "synthesis"
+                ? Sparkles
+                : Lightbulb;
           return (
             <aside
-              key={index}
-              className="my-8 rounded-md border border-accent/40 bg-accent/10 p-5"
+              key={key}
+              className={cn(
+                "my-8 rounded-md border p-5",
+                block.type === "warning"
+                  ? "border-amber-400/30 bg-amber-400/10"
+                  : "border-accent/40 bg-accent/10"
+              )}
             >
-              <p className="my-0 text-sm font-semibold uppercase tracking-[0.16em] text-accent-foreground/80">
+              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-accent-foreground/80">
+                <Icon className="h-4 w-4" />
                 {block.title}
-              </p>
+              </div>
               <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground">
                 {block.text}
               </p>
@@ -24,42 +154,325 @@ export function ContentRenderer({ blocks }: { blocks: ContentBlock[] }) {
           );
         }
 
-        if (block.type === "list") {
+        if (block.type === "list" || block.type === "orderedList") {
           return (
-            <ul key={index} className="my-7 space-y-3">
-              {block.items.map((item) => (
-                <li key={item} className="flex gap-3">
-                  <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            <NumberedCards
+              key={key}
+              title={block.title}
+              items={block.items}
+              ordered={block.type === "orderedList"}
+            />
+          );
+        }
+
+        if (block.type === "checklist") {
+          return (
+            <div
+              key={key}
+              className="my-7 rounded-md border border-border bg-card/65 p-5"
+            >
+              {block.title ? (
+                <div className="mb-4 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <ClipboardCheck className="h-4 w-4" />
+                  {block.title}
+                </div>
+              ) : null}
+              <div className="grid gap-3 sm:grid-cols-2">
+                {block.items.map((item) => (
+                  <div key={item} className="flex gap-3 rounded-md border border-border/70 bg-background/50 p-3 text-sm leading-6">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-accent-foreground" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (block.type === "conceptCard") {
+          return (
+            <div
+              key={key}
+              className="my-8 rounded-md border border-border bg-card/75 p-5"
+            >
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Brain className="h-4 w-4" />
+                Concept
+              </div>
+              <h3 className="mb-0 mt-4 font-serif text-3xl font-semibold">
+                {block.title}
+              </h3>
+              <p className="mb-0 mt-3">{block.body}</p>
+              {block.whyItMatters ? (
+                <p className="mb-0 mt-4 border-l border-accent pl-4 text-base leading-7 text-muted-foreground">
+                  {block.whyItMatters}
+                </p>
+              ) : null}
+            </div>
+          );
+        }
+
+        if (block.type === "example") {
+          return (
+            <div key={key} className="my-7 rounded-md border border-border bg-secondary/20 p-5">
+              <p className="my-0 text-sm font-medium text-muted-foreground">
+                Example
+              </p>
+              <h3 className="mb-0 mt-2 font-serif text-2xl font-semibold">
+                {block.title}
+              </h3>
+              <p className="mb-0 mt-3">{block.body}</p>
+            </div>
+          );
+        }
+
+        if (block.type === "expandedExample") {
+          return (
+            <div key={key} className="my-9 rounded-md border border-border bg-card/65 p-5">
+              <p className="my-0 text-sm font-medium text-muted-foreground">
+                Expanded example
+              </p>
+              <h3 className="mb-0 mt-2 font-serif text-2xl font-semibold">
+                {block.scenario}
+              </h3>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="rounded-md border border-border/70 bg-background/55 p-4">
+                  <p className="my-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    Default approach
+                  </p>
+                  <p className="mb-0 mt-2 text-base leading-7">
+                    {block.defaultApproach}
+                  </p>
+                </div>
+                <div className="rounded-md border border-accent/40 bg-accent/10 p-4">
+                  <p className="my-0 text-xs uppercase tracking-[0.16em] text-accent-foreground/80">
+                    Better approach
+                  </p>
+                  <p className="mb-0 mt-2 text-base leading-7">
+                    {block.betterApproach}
+                  </p>
+                </div>
+              </div>
+              <p className="mb-0 mt-4 text-base leading-7 text-muted-foreground">
+                {block.whyItWorks}
+              </p>
+            </div>
+          );
+        }
+
+        if (block.type === "application") {
+          return (
+            <div key={key} className="my-9 rounded-md border border-border bg-secondary/25 p-5">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Target className="h-4 w-4" />
+                Application
+              </div>
+              <h3 className="mb-0 mt-3 font-serif text-2xl font-semibold">
+                {block.context}
+              </h3>
+              <NumberedCards items={block.steps} ordered />
+              <p className="mb-0 mt-4 rounded-md border border-accent/35 bg-accent/10 p-4 text-base leading-7">
+                {block.result}
+              </p>
+            </div>
+          );
+        }
+
+        if (block.type === "exercise") {
+          return (
+            <div key={key} className="my-9 rounded-md border border-border bg-card/70 p-5">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <PenLine className="h-4 w-4" />
+                Exercise
+              </div>
+              <h3 className="mb-0 mt-3 font-serif text-2xl font-semibold">
+                {block.title}
+              </h3>
+              <p className="mb-0 mt-3">{block.instructions}</p>
+              <NumberedCards items={block.prompts} ordered />
+              {block.checklist ? (
+                <NumberedCards title="Check before you implement" items={block.checklist} />
+              ) : null}
+            </div>
+          );
+        }
+
+        if (block.type === "reflectionPrompt") {
+          return (
+            <ReflectionField
+              key={key}
+              storageId={`${storagePrefix}:reflection:${block.id || index}`}
+              question={block.question}
+              helperText={block.helperText}
+            />
+          );
+        }
+
+        if (block.type === "keyDistinction") {
+          return (
+            <div key={key} className="my-8 rounded-md border border-border bg-card/65 p-5">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <GitCompare className="h-4 w-4" />
+                {block.title}
+              </div>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="rounded-md border border-border bg-background/55 p-4">
+                  <p className="my-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    Not
+                  </p>
+                  <p className="mb-0 mt-2 text-base leading-7">{block.not}</p>
+                </div>
+                <div className="rounded-md border border-accent/40 bg-accent/10 p-4">
+                  <p className="my-0 text-xs uppercase tracking-[0.16em] text-accent-foreground/80">
+                    But
+                  </p>
+                  <p className="mb-0 mt-2 text-base leading-7">{block.but}</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        if (block.type === "misconception") {
+          return (
+            <div key={key} className="my-8 rounded-md border border-border bg-card/70 p-5">
+              <p className="my-0 text-sm font-medium text-muted-foreground">
+                Misconception
+              </p>
+              <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground">
+                {block.misconception}
+              </p>
+              <p className="mb-0 mt-4 rounded-md border border-accent/35 bg-accent/10 p-4 text-base leading-7">
+                {block.correction}
+              </p>
+              <p className="mb-0 mt-3 text-base leading-7 text-muted-foreground">
+                {block.whyItMatters}
+              </p>
+            </div>
+          );
+        }
+
+        if (block.type === "mentalModel") {
+          return (
+            <div key={key} className="my-8 rounded-md border border-border bg-secondary/25 p-5">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Workflow className="h-4 w-4" />
+                Mental model
+              </div>
+              <h3 className="mb-0 mt-3 font-serif text-2xl font-semibold">
+                {block.name}
+              </h3>
+              <p className="mb-0 mt-3">{block.explanation}</p>
+              <p className="mb-0 mt-4 text-base leading-7 text-muted-foreground">
+                <span className="font-medium text-foreground">Use when: </span>
+                {block.useWhen}
+              </p>
+            </div>
+          );
+        }
+
+        if (block.type === "diagram") {
+          return (
+            <div key={key} className="my-9 rounded-md border border-border bg-secondary/30 p-5">
+              <p className="my-0 text-sm font-medium text-muted-foreground">
+                {block.title}
+              </p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {block.steps.map((step, stepIndex) => (
+                  <div key={step} className="rounded-md border border-border/70 bg-background/60 p-4">
+                    <span className="text-xs text-muted-foreground">
+                      {String(stepIndex + 1).padStart(2, "0")}
+                    </span>
+                    <p className="my-0 mt-2 text-base font-medium leading-6">
+                      {step}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (block.type === "framework") {
+          return (
+            <div key={key} className="my-9 rounded-md border border-border bg-card/65 p-5">
+              <p className="my-0 text-sm font-medium text-muted-foreground">
+                {block.title}
+              </p>
+              <div className="mt-5 space-y-3">
+                {block.stages.map((stage, stageIndex) => (
+                  <div key={`${stage.name}-${stageIndex}`} className="grid gap-2 rounded-md border border-border/70 bg-background/55 p-4 sm:grid-cols-[120px_1fr]">
+                    <p className="my-0 text-sm font-medium text-foreground">
+                      {stage.name}
+                    </p>
+                    <p className="my-0 text-sm leading-6 text-muted-foreground">
+                      {stage.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (block.type === "comparisonTable") {
+          return (
+            <div key={key} className="my-9 overflow-hidden rounded-md border border-border bg-card/65">
+              <div className="border-b border-border p-4">
+                <p className="my-0 text-sm font-medium text-muted-foreground">
+                  {block.title}
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[520px] text-left text-sm">
+                  <thead className="bg-secondary/40 text-muted-foreground">
+                    <tr>
+                      {block.columns.map((column) => (
+                        <th key={column} className="px-4 py-3 font-medium">
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.map((row, rowIndex) => (
+                      <tr key={row.join("-")} className={rowIndex === block.rows.length - 1 ? "" : "border-b border-border/70"}>
+                        {row.map((cell) => (
+                          <td key={cell} className="px-4 py-3 leading-6 text-muted-foreground">
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        }
+
+        if (block.type === "retentionAnchor") {
+          return (
+            <div
+              key={key}
+              className="my-8 rounded-md border border-accent/40 bg-accent/10 p-5"
+            >
+              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-accent-foreground/80">
+                <Sparkles className="h-4 w-4" />
+                {block.title}
+              </div>
+              <p className="mb-0 mt-3 font-serif text-2xl leading-8 text-foreground">
+                {block.anchor}
+              </p>
+            </div>
           );
         }
 
         return (
-          <div
-            key={index}
-            className="my-9 rounded-md border border-border bg-secondary/30 p-5"
-          >
-            <p className="my-0 text-sm font-medium text-muted-foreground">
-              {block.title}
+          <div key={key} className="my-8 rounded-md border border-border bg-card/65 p-5">
+            <p className="my-0 text-base leading-7 text-muted-foreground">
+              Unsupported content block.
             </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {block.steps.map((step, stepIndex) => (
-                <div
-                  key={step}
-                  className="rounded-md border border-border/70 bg-background/60 p-4"
-                >
-                  <span className="text-xs text-muted-foreground">
-                    {String(stepIndex + 1).padStart(2, "0")}
-                  </span>
-                  <p className="my-0 mt-2 text-base font-medium leading-6">
-                    {step}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         );
       })}

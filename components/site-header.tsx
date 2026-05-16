@@ -16,12 +16,12 @@ export function SiteHeader() {
           <Link href="/library" className="transition-colors hover:text-foreground">
             Library
           </Link>
-          <a href="/#philosophy" className="transition-colors hover:text-foreground">
+          <Link href="/#philosophy" className="transition-colors hover:text-foreground">
             Philosophy
-          </a>
-          <a href="/#preview" className="transition-colors hover:text-foreground">
+          </Link>
+          <Link href="/#preview" className="transition-colors hover:text-foreground">
             Preview
-          </a>
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
