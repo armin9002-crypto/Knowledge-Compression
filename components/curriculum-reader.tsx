@@ -136,15 +136,15 @@ export function CurriculumReader({ book }: { book: Book }) {
             </Button>
             <ThemeToggle />
           </div>
-          <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
+          <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-end xl:grid-cols-[1fr_320px]">
             <div>
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                 {book.category} / {book.difficulty}
               </p>
-              <h1 className="mt-3 font-serif text-4xl font-semibold tracking-normal sm:text-5xl md:text-7xl">
+              <h1 className="mt-3 font-serif text-[clamp(2.4rem,1.75rem+2.8vw,4.45rem)] font-semibold leading-[0.98] tracking-normal">
                 {book.title}
               </h1>
-              <p className="mt-4 max-w-3xl text-lg leading-8 text-muted-foreground">
+              <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground md:text-lg md:leading-8">
                 {book.description}
               </p>
             </div>
@@ -178,7 +178,7 @@ export function CurriculumReader({ book }: { book: Book }) {
                 <Target className="h-4 w-4" />
                 What this curriculum teaches
               </div>
-              <p className="font-serif text-2xl leading-8 text-foreground md:text-3xl md:leading-10">
+              <p className="font-serif text-[clamp(1.45rem,1.18rem+0.75vw,1.85rem)] leading-[1.28] text-foreground">
                 {book.promise}
               </p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -225,7 +225,7 @@ export function CurriculumReader({ book }: { book: Book }) {
         </div>
       </div>
 
-      <div className="container grid gap-8 py-8 lg:grid-cols-[270px_minmax(0,800px)] lg:gap-10 lg:py-14 xl:grid-cols-[270px_minmax(0,800px)_200px]">
+      <div className="container grid gap-8 py-8 lg:grid-cols-[250px_minmax(0,780px)] lg:gap-12 lg:py-14 xl:grid-cols-[250px_minmax(0,780px)_180px] xl:gap-14">
         <aside
           className={cn(
             "lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto lg:pr-1",
@@ -318,7 +318,7 @@ export function CurriculumReader({ book }: { book: Book }) {
               <section
                 id={section.id}
                 key={section.id}
-                className="scroll-mt-28 border-b border-border/70 py-16 first:pt-0 md:py-20"
+                className="scroll-mt-28 border-b border-border/70 py-14 first:pt-0 md:py-18 lg:py-20"
               >
                 <div className="mb-8 flex flex-wrap items-center gap-3 font-sans text-sm text-muted-foreground">
                   <span className="rounded-md border border-border bg-card/50 px-2.5 py-1">
@@ -332,10 +332,10 @@ export function CurriculumReader({ book }: { book: Book }) {
                 </div>
                 <div className="flex items-start justify-between gap-5 border-b border-border/70 pb-7 md:pb-8">
                   <div>
-                    <h2 className="max-w-3xl font-serif text-4xl font-semibold leading-[1.04] tracking-normal sm:text-5xl md:text-6xl">
+                    <h2 className="max-w-3xl font-serif text-[clamp(2.15rem,1.62rem+1.7vw,3.55rem)] font-semibold leading-[1.04] tracking-normal">
                       {section.title}
                     </h2>
-                    <p className="mt-5 max-w-3xl font-serif text-xl leading-8 text-muted-foreground md:text-[1.7rem] md:leading-10">
+                    <p className="mt-5 max-w-3xl font-serif text-[clamp(1.18rem,1.05rem+0.45vw,1.48rem)] leading-[1.55] text-muted-foreground">
                       {section.summary}
                     </p>
                   </div>
@@ -397,8 +397,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                 ))}
 
                 <div className="mt-10 grid gap-4 md:mt-12 md:grid-cols-2">
-                  <div className="rounded-md border border-border bg-card/45 p-5">
-                    <h3 className="font-serif text-2xl font-semibold">
+                  <div className="rounded-md border border-border bg-card/45 p-4 md:p-5">
+                    <h3 className="font-serif text-xl font-semibold md:text-2xl">
                       Learning Objectives
                     </h3>
                     <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
@@ -410,8 +410,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                       ))}
                     </ul>
                   </div>
-                  <div className="rounded-md border border-border bg-card/45 p-5">
-                    <h3 className="font-serif text-2xl font-semibold">
+                  <div className="rounded-md border border-border bg-card/45 p-4 md:p-5">
+                    <h3 className="font-serif text-xl font-semibold md:text-2xl">
                       Why It Matters
                     </h3>
                     <p className="mt-4 text-sm leading-7 text-muted-foreground">
@@ -421,8 +421,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                 </div>
 
                 <div className="mt-6 grid gap-5 md:mt-8 md:grid-cols-2">
-                  <div className="rounded-md border border-border bg-card/45 p-5">
-                    <h3 className="font-serif text-2xl font-semibold">
+                  <div className="rounded-md border border-border bg-card/45 p-4 md:p-5">
+                    <h3 className="font-serif text-xl font-semibold md:text-2xl">
                       Applied Examples
                     </h3>
                     <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
@@ -431,8 +431,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                       ))}
                     </ul>
                   </div>
-                  <div className="rounded-md border border-border bg-card/45 p-5">
-                    <h3 className="font-serif text-2xl font-semibold">
+                  <div className="rounded-md border border-border bg-card/45 p-4 md:p-5">
+                    <h3 className="font-serif text-xl font-semibold md:text-2xl">
                       Retention Notes
                     </h3>
                     <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
@@ -443,8 +443,8 @@ export function CurriculumReader({ book }: { book: Book }) {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-md border border-border bg-card/40 p-5">
-                  <h3 className="font-serif text-2xl font-semibold">
+                <div className="mt-5 rounded-md border border-border bg-card/40 p-4 md:p-5">
+                  <h3 className="font-serif text-xl font-semibold md:text-2xl">
                     Practical Application
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-muted-foreground">
