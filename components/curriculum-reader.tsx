@@ -38,6 +38,7 @@ export function CurriculumReader({ book }: { book: Book }) {
   const [readerState, setReaderState] = useState<ReaderState>(emptyState);
   const [activeSection, setActiveSection] = useState(book.sections[0]?.id);
   const [lessonProgress, setLessonProgress] = useState(0);
+  const [readingProgress, setReadingProgress] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
@@ -112,6 +113,27 @@ export function CurriculumReader({ book }: { book: Book }) {
     };
   }, [activeTopLevelSection]);
 
+  useEffect(() => {
+    const updateReadingProgress = () => {
+      const scrollable =
+        document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) {
+        setReadingProgress(0);
+        return;
+      }
+      const raw = window.scrollY / scrollable;
+      setReadingProgress(Math.max(0, Math.min(100, Math.round(raw * 100))));
+    };
+
+    updateReadingProgress();
+    window.addEventListener("scroll", updateReadingProgress, { passive: true });
+    window.addEventListener("resize", updateReadingProgress);
+    return () => {
+      window.removeEventListener("scroll", updateReadingProgress);
+      window.removeEventListener("resize", updateReadingProgress);
+    };
+  }, []);
+
   const toggle = (key: keyof ReaderState, id: string) => {
     setReaderState((current) => {
       const exists = current[key].includes(id);
@@ -126,6 +148,42 @@ export function CurriculumReader({ book }: { book: Book }) {
 
   return (
     <main className="min-h-screen bg-background">
+      <div className="sticky top-0 z-40 border-b border-border/70 bg-background/84 backdrop-blur-xl">
+        <div className="mx-auto flex h-[3.25rem] w-full max-w-[1500px] items-center justify-between gap-3 px-5 sm:px-6 lg:h-12 lg:px-8">
+          <div className="min-w-0 sm:max-w-[42%]">
+            <p className="hidden text-xs uppercase tracking-[0.18em] text-muted-foreground sm:block">
+              Reading
+            </p>
+            <p className="truncate font-serif text-base font-semibold leading-5 text-foreground sm:hidden">
+              {book.title}
+            </p>
+            <p className="hidden truncate text-xs leading-5 text-muted-foreground sm:block">
+              {activeTopLevelSection?.title}
+            </p>
+          </div>
+          <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
+            <div className="hidden min-w-[220px] sm:block lg:min-w-[300px]">
+              <div className="mb-1 flex items-center justify-end gap-2 text-xs text-muted-foreground">
+                <span className="max-w-[170px] truncate text-right font-serif text-sm font-semibold text-foreground lg:max-w-[240px]">
+                  {book.title}
+                </span>
+                <span className="font-medium text-foreground">
+                  {readingProgress}%
+                </span>
+              </div>
+              <Progress value={readingProgress} className="h-1" />
+            </div>
+            <span className="w-9 text-right text-xs font-medium text-foreground sm:hidden">
+              {readingProgress}%
+            </span>
+            <FontSizeToggle compact className="sm:hidden" />
+            <ThemeToggle compact className="sm:hidden" />
+            <FontSizeToggle className="hidden sm:inline-flex" />
+            <ThemeToggle className="hidden sm:inline-flex" />
+          </div>
+        </div>
+        <Progress value={readingProgress} className="h-1 rounded-none sm:hidden" />
+      </div>
       <div className="border-b border-border bg-card/40">
         <div className="mx-auto w-full max-w-[1500px] px-5 py-7 sm:px-6 lg:px-8">
           <div className="mb-4 flex items-center justify-between gap-3">
