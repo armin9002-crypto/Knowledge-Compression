@@ -7,13 +7,17 @@ import {
   CheckCircle2,
   ChevronLeft,
   Clock,
+  Eye,
   GraduationCap,
   Highlighter,
   Layers,
   ListTree,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   PlayCircle,
-  Target
+  Target,
+  X
 } from "lucide-react";
 import { ContentRenderer } from "@/components/content-renderer";
 import { FontSizeToggle } from "@/components/font-size-toggle";
@@ -32,6 +36,9 @@ import {
 import type { Book } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+const FOCUS_MODE_KEY = "kc-reader-focus-mode";
+const SIDEBAR_COLLAPSED_KEY = "kc-reader-sidebar-collapsed";
+
 export function CurriculumReader({ book }: { book: Book }) {
   const [readerState, setReaderState] = useState<StoredReaderState>(() =>
     emptyReaderState()
@@ -42,6 +49,9 @@ export function CurriculumReader({ book }: { book: Book }) {
   const [lessonProgress, setLessonProgress] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
 
   useEffect(() => {
     const stored = readBookProgress(book.slug);
@@ -56,9 +66,26 @@ export function CurriculumReader({ book }: { book: Book }) {
     if (startingSection) {
       setActiveSection(startingSection);
     }
+    setFocusMode(window.localStorage.getItem(FOCUS_MODE_KEY) === "true");
+    setSidebarCollapsed(
+      window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true"
+    );
     writeLastOpenedBookSlug(book.slug);
     setHydrated(true);
   }, [book.sections, book.slug]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    window.localStorage.setItem(FOCUS_MODE_KEY, String(focusMode));
+  }, [focusMode, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    window.localStorage.setItem(
+      SIDEBAR_COLLAPSED_KEY,
+      String(sidebarCollapsed)
+    );
+  }, [hydrated, sidebarCollapsed]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -135,6 +162,10 @@ export function CurriculumReader({ book }: { book: Book }) {
     : progressSummary.hasStarted
       ? "Continue reading"
       : "Start curriculum";
+  const savedSections = useMemo(() => {
+    const savedIds = new Set([...readerState.bookmarks, ...readerState.highlights]);
+    return book.sections.filter((section) => savedIds.has(section.id));
+  }, [book.sections, readerState.bookmarks, readerState.highlights]);
 
   const activeTopLevelSection = useMemo(() => {
     return (
@@ -228,6 +259,11 @@ export function CurriculumReader({ book }: { book: Book }) {
     });
   };
 
+  const jumpToSavedSection = (sectionId: string) => {
+    setSavedOpen(false);
+    window.setTimeout(() => scrollToSection(sectionId), 80);
+  };
+
   const toggle = (
     key: "completed" | "bookmarks" | "highlights",
     id: string
@@ -278,6 +314,43 @@ export function CurriculumReader({ book }: { book: Book }) {
             <span className="w-9 text-right text-xs font-medium text-foreground sm:hidden">
               {readingProgress}%
             </span>
+            <Button
+              type="button"
+              variant={savedOpen ? "secondary" : "outline"}
+              size="icon"
+              className="h-9 w-9 border-border/80 bg-card/45 text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+              title="Saved ideas"
+              aria-label="Open saved ideas"
+              onClick={() => setSavedOpen(true)}
+            >
+              <Bookmark className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={focusMode ? "secondary" : "outline"}
+              size="icon"
+              className="h-9 w-9 border-border/80 bg-card/45 text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+              title={focusMode ? "Exit focus mode" : "Focus mode"}
+              aria-label={focusMode ? "Exit focus mode" : "Enter focus mode"}
+              onClick={() => setFocusMode((current) => !current)}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant={sidebarCollapsed ? "secondary" : "outline"}
+              size="icon"
+              className="hidden h-9 w-9 border-border/80 bg-card/45 text-muted-foreground hover:bg-secondary/70 hover:text-foreground lg:inline-flex"
+              title={sidebarCollapsed ? "Expand curriculum path" : "Collapse curriculum path"}
+              aria-label={sidebarCollapsed ? "Expand curriculum path" : "Collapse curriculum path"}
+              onClick={() => setSidebarCollapsed((current) => !current)}
+            >
+              {sidebarCollapsed ? (
+                <PanelLeftOpen className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </Button>
             <FontSizeToggle compact className="sm:hidden" />
             <ThemeToggle compact className="sm:hidden" />
             <FontSizeToggle className="hidden sm:inline-flex" />
@@ -485,10 +558,20 @@ export function CurriculumReader({ book }: { book: Book }) {
         </div>
       </div>
 
-      <div className="mx-auto grid w-full max-w-[1500px] gap-8 px-5 py-8 sm:px-6 lg:grid-cols-[250px_minmax(0,780px)] lg:justify-center lg:gap-10 lg:px-8 lg:py-14 xl:grid-cols-[250px_minmax(0,780px)_180px] xl:gap-12 2xl:max-w-[1600px]">
+      <div
+        className={cn(
+          "mx-auto grid w-full gap-8 px-5 py-8 sm:px-6 lg:justify-center lg:gap-10 lg:px-8 lg:py-14 xl:gap-12",
+          focusMode
+            ? "max-w-[980px] lg:grid-cols-[minmax(0,820px)]"
+            : sidebarCollapsed
+              ? "max-w-[1300px] lg:grid-cols-[minmax(0,820px)] xl:grid-cols-[minmax(0,820px)_200px]"
+              : "max-w-[1500px] lg:grid-cols-[250px_minmax(0,780px)] xl:grid-cols-[250px_minmax(0,780px)_180px] 2xl:max-w-[1600px]"
+        )}
+      >
         <aside
           className={cn(
             "lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto lg:pr-1",
+            (focusMode || sidebarCollapsed) && "lg:hidden",
             navOpen ? "block" : "hidden"
           )}
         >
@@ -557,7 +640,7 @@ export function CurriculumReader({ book }: { book: Book }) {
           </div>
         </aside>
 
-        <div className="lg:hidden">
+        <div className={cn("lg:hidden", focusMode && "hidden")}>
           <Button
             variant="outline"
             className="w-full"
@@ -792,7 +875,7 @@ export function CurriculumReader({ book }: { book: Book }) {
           })}
         </article>
 
-        <aside className="hidden xl:block">
+        <aside className={cn("hidden xl:block", focusMode && "xl:hidden")}>
           <div className="sticky top-24 rounded-md border border-border bg-card/50 p-4">
             <p className="text-sm font-medium">Study state</p>
             <div className="mt-4">
@@ -852,6 +935,80 @@ export function CurriculumReader({ book }: { book: Book }) {
           </div>
         </aside>
       </div>
+
+      {savedOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end bg-background/70 backdrop-blur-sm sm:items-center sm:justify-center">
+          <div className="max-h-[82vh] w-full overflow-auto rounded-t-md border border-border bg-card p-5 shadow-panel sm:max-w-xl sm:rounded-md sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  Saved ideas
+                </p>
+                <h2 className="mt-2 font-serif text-2xl font-semibold">
+                  Bookmarks and highlights
+                </h2>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Close saved ideas"
+                onClick={() => setSavedOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {savedSections.length ? (
+              <div className="mt-6 space-y-3">
+                {savedSections.map((section) => {
+                  const bookmarked = readerState.bookmarks.includes(section.id);
+                  const highlighted = readerState.highlights.includes(section.id);
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      className="w-full rounded-md border border-border bg-background/45 p-4 text-left transition-colors hover:bg-secondary/55"
+                      onClick={() => jumpToSavedSection(section.id)}
+                    >
+                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        {bookmarked ? (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-border bg-card/55 px-2 py-1">
+                            <Bookmark className="h-3.5 w-3.5" />
+                            Bookmarked
+                          </span>
+                        ) : null}
+                        {highlighted ? (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-border bg-card/55 px-2 py-1">
+                            <Highlighter className="h-3.5 w-3.5" />
+                            Highlighted
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-3 font-serif text-xl font-semibold">
+                        {section.title}
+                      </p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                        {section.summary}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-md border border-border bg-background/45 p-6 text-center">
+                <p className="font-serif text-xl font-semibold">
+                  No saved ideas yet.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Bookmark or highlight a lesson while reading, and it will
+                  appear here for quick return.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
