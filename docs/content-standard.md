@@ -16,7 +16,9 @@ A user should leave a completed module feeling:
 - I can apply the ideas in real contexts.
 - I retained more than a few slogans.
 
-The experience should reward serious reading. Supporting blocks, examples, exercises, and takeaways should help the prose; they should not replace it.
+The experience should reward serious reading. Supporting blocks, examples, implementation guidance, and takeaways should help the prose; they should not replace it.
+
+Knowledge Compression is not a workbook. Future modules should not include reflection cards, exercise cards, user-response fields, homework-style prompts, or saved answer interactions unless a future product direction explicitly reintroduces them. Practicality should remain, but it should be framed as applied explanation, implementation guidance, practical playbooks, and synthesis inside a premium reading experience.
 
 ## Curriculum Structure
 
@@ -45,10 +47,9 @@ Each major lesson should usually include:
 - Nuance and limitations: where the idea can be misused or misunderstood.
 - Common mistakes: what readers usually get wrong.
 - Implementation guidance: how to apply the lesson in real life.
-- Reflection prompt: one useful question, not a generic journaling prompt.
 - Takeaways: concise, high-signal synthesis.
 
-The prose should appear before most study aids. A lesson should read like a chapter first and a worksheet second.
+The prose should appear before most study aids. A lesson should read like a chapter first, not a worksheet.
 
 ## Depth Targets
 
@@ -123,8 +124,8 @@ Use supporting blocks for:
 
 - Key distinctions.
 - Applied examples.
-- Reflection prompts.
-- Exercises.
+- Implementation guidance.
+- Practical playbooks.
 - Misconceptions.
 - Mental models.
 - Frameworks.
@@ -133,6 +134,15 @@ Use supporting blocks for:
 - Final synthesis.
 
 Avoid using supporting blocks as a substitute for teaching prose. If a reader only scans cards, they should miss the depth of the lesson.
+
+Avoid by default:
+
+- Reflection prompts.
+- Workbook exercises.
+- User-response fields.
+- Gamified tasks.
+- Homework-style interactions.
+- Saved prompt responses.
 
 ## Copyright And Content Safety
 
@@ -160,7 +170,7 @@ Before adding a new book:
 - [ ] Write long-form lesson content first.
 - [ ] Add examples and practical applications.
 - [ ] Add nuance, limitations, and common mistakes.
-- [ ] Add reflection prompts and implementation guidance.
+- [ ] Add implementation guidance and practical playbooks where they genuinely improve comprehension.
 - [ ] Add a final synthesis lesson.
 - [ ] Test rendering on the book page.
 - [ ] Confirm the curriculum feels like a deep study guide, not a summary.

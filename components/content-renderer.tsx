@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Brain,
@@ -8,57 +7,12 @@ import {
   ClipboardCheck,
   GitCompare,
   Lightbulb,
-  MessageSquareText,
-  PenLine,
   Sparkles,
   Target,
   Workflow
 } from "lucide-react";
 import type { ContentBlock } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-function ReflectionField({
-  storageId,
-  question,
-  helperText
-}: {
-  storageId: string;
-  question: string;
-  helperText?: string;
-}) {
-  const [value, setValue] = useState("");
-
-  useEffect(() => {
-    setValue(window.localStorage.getItem(storageId) || "");
-  }, [storageId]);
-
-  useEffect(() => {
-    window.localStorage.setItem(storageId, value);
-  }, [storageId, value]);
-
-  return (
-    <div className="my-10 rounded-md border border-border bg-card/55 p-5 md:p-6">
-      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <MessageSquareText className="h-4 w-4" />
-        Reflection
-      </div>
-      <p className="mb-0 mt-4 font-serif text-2xl leading-8 text-foreground md:text-[1.7rem] md:leading-9">
-        {question}
-      </p>
-      {helperText ? (
-        <p className="mb-0 mt-2 text-sm leading-6 text-muted-foreground">
-          {helperText}
-        </p>
-      ) : null}
-      <textarea
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder="Write a private study note..."
-        className="mt-5 min-h-32 w-full resize-y rounded-md border border-border bg-background/70 p-4 font-sans text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-accent"
-      />
-    </div>
-  );
-}
 
 function NumberedCards({
   title,
@@ -91,8 +45,7 @@ function NumberedCards({
 }
 
 export function ContentRenderer({
-  blocks,
-  storagePrefix = "curriculum"
+  blocks
 }: {
   blocks: ContentBlock[];
   storagePrefix?: string;
@@ -275,36 +228,6 @@ export function ContentRenderer({
                 {block.result}
               </p>
             </div>
-          );
-        }
-
-        if (block.type === "exercise") {
-          return (
-            <div key={key} className="my-10 rounded-md border border-border/80 bg-card/50 p-5 md:p-6">
-              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <PenLine className="h-4 w-4" />
-                Exercise
-              </div>
-              <h3 className="mb-0 mt-3 font-serif text-2xl font-semibold">
-                {block.title}
-              </h3>
-              <p className="mb-0 mt-3">{block.instructions}</p>
-              <NumberedCards items={block.prompts} ordered />
-              {block.checklist ? (
-                <NumberedCards title="Check before you implement" items={block.checklist} />
-              ) : null}
-            </div>
-          );
-        }
-
-        if (block.type === "reflectionPrompt") {
-          return (
-            <ReflectionField
-              key={key}
-              storageId={`${storagePrefix}:reflection:${block.id || index}`}
-              question={block.question}
-              helperText={block.helperText}
-            />
           );
         }
 

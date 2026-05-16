@@ -49,18 +49,6 @@ export type ContentBlock =
       result: string;
     })
   | (BaseBlock & {
-      type: "exercise";
-      title: string;
-      instructions: string;
-      prompts: string[];
-      checklist?: string[];
-    })
-  | (BaseBlock & {
-      type: "reflectionPrompt";
-      question: string;
-      helperText?: string;
-    })
-  | (BaseBlock & {
       type: "keyDistinction";
       title: string;
       not: string;
@@ -130,8 +118,6 @@ export type CurriculumSection = {
     misconception: string;
     correction: string;
   }[];
-  reflectionPrompts: string[];
-  implementationExercises: string[];
   retentionAnchors: string[];
   takeaways: string[];
   relatedSections?: string[];

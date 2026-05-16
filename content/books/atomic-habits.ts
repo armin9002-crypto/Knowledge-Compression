@@ -18,8 +18,7 @@ type ChapterInput = {
     misconception: string;
     correction: string;
   }[];
-  reflection: string;
-  exercises: string[];
+  applicationLens: string;
   anchors: string[];
   takeaways: string[];
   examples: string[];
@@ -44,11 +43,10 @@ function chapter(input: ChapterInput): CurriculumSection {
       ),
       ...input.support,
       {
-        type: "reflectionPrompt",
-        id: `${input.id}-reflection`,
-        question: input.reflection,
-        helperText:
-          "Write one practical answer. This note stays local to your browser."
+        type: "callout",
+        id: `${input.id}-application-lens`,
+        title: "Application lens",
+        text: input.applicationLens
       },
       {
         type: "retentionAnchor",
@@ -61,8 +59,6 @@ function chapter(input: ChapterInput): CurriculumSection {
     practicalApplication: input.practicalApplication,
     commonMistakes: input.commonMistakes,
     misconceptions: input.misconceptions,
-    reflectionPrompts: [input.reflection],
-    implementationExercises: input.exercises,
     retentionAnchors: input.anchors,
     takeaways: input.takeaways,
     relatedSections: input.relatedSections
@@ -112,15 +108,15 @@ const atomicSections: CurriculumSection[] = [
           "The behavior is small enough to repeat, but it still preserves the seriousness of the identity: a person who studies ideas carefully."
       },
       {
-        type: "exercise",
-        title: "Find the smallest serious version",
-        instructions:
-          "Choose one behavior you care about and reduce it until it can survive a busy weekday without becoming meaningless.",
-        prompts: [
-          "What larger identity does this behavior support?",
-          "What is the smallest version that still counts as real evidence?",
-          "What leading signal will show the system is taking root?"
-        ]
+        type: "application",
+        context: "Finding the smallest serious version",
+        steps: [
+          "Start with the larger identity the behavior supports.",
+          "Reduce the behavior until it can survive a busy weekday without becoming meaningless.",
+          "Judge early progress by leading signals, such as repeated starts and lower resistance."
+        ],
+        result:
+          "The habit remains practical without becoming trivial: small enough to repeat, serious enough to become evidence."
       }
     ],
     whyThisMatters:
@@ -139,13 +135,8 @@ const atomicSections: CurriculumSection[] = [
           "Tiny actions are the starting units of a system. They matter when they repeat, compound, and scale into deeper capability."
       }
     ],
-    reflection:
-      "Where are you underestimating a small behavior because it does not look impressive yet?",
-    exercises: [
-      "Write one small behavior that supports an identity you care about.",
-      "Define one leading indicator you can track for four weeks.",
-      "Review whether the behavior is becoming easier before judging the outcome."
-    ],
+    applicationLens:
+      "A useful way to apply this lesson is to identify one small behavior that supports an identity you care about and then evaluate it by repeatability before visible results arrive. The important question is not whether the behavior looks impressive in isolation; it is whether the action is credible enough to repeat and meaningful enough to become evidence.",
     anchors: [
       "Small habits are powerful when they are repeatable, directional, and allowed to compound.",
       "Judge early habits by leading behaviors before judging them by lagging outcomes."
@@ -212,15 +203,15 @@ const atomicSections: CurriculumSection[] = [
           "Without evidence, identity language becomes decoration. With evidence, it becomes a stabilizing force."
       },
       {
-        type: "exercise",
-        title: "Build identity evidence",
-        instructions:
-          "Choose one identity you want to strengthen and pair it with one proof behavior.",
-        prompts: [
-          "Who is the kind of person who would naturally do this?",
-          "What tiny action would count as evidence this week?",
-          "What old identity statement needs less authority over your choices?"
-        ]
+        type: "application",
+        context: "Building identity evidence",
+        steps: [
+          "Name the identity the habit should make more believable.",
+          "Pair that identity with one proof behavior small enough to repeat this week.",
+          "Treat old identity statements as hypotheses to update, not permanent facts."
+        ],
+        result:
+          "Identity change becomes grounded in evidence instead of empty self-talk or perfectionist pressure."
       }
     ],
     whyThisMatters:
@@ -239,13 +230,8 @@ const atomicSections: CurriculumSection[] = [
           "Often you act first in small ways, then belief catches up as evidence accumulates."
       }
     ],
-    reflection:
-      "What small behavior would give you credible evidence for the person you want to become?",
-    exercises: [
-      "Write one identity sentence: I am becoming someone who...",
-      "Choose one proof behavior that takes less than ten minutes.",
-      "Review the proof weekly without demanding perfection."
-    ],
+    applicationLens:
+      "The practical center of identity-based change is evidence. Strong identity language points toward a proof behavior: a short reading session, a small automatic transfer, a prepared workout bag, a completed review. The identity should make action easier without turning one missed repetition into a verdict.",
     anchors: [
       "Identity follows evidence.",
       "Every repetition is a vote, not a final verdict."
@@ -308,15 +294,15 @@ const atomicSections: CurriculumSection[] = [
           "The new design addresses the craving and changes the cue, instead of merely scolding the response."
       },
       {
-        type: "exercise",
-        title: "Map one loop",
-        instructions:
-          "Choose one repeated behavior, helpful or harmful, and map it through the four-part loop.",
-        prompts: [
-          "What cue usually appears before the behavior?",
-          "What state change do you want in that moment?",
-          "What reward teaches you to repeat the behavior?"
-        ]
+        type: "application",
+        context: "Diagnosing a habit loop",
+        steps: [
+          "Identify the cue that usually appears before the behavior.",
+          "Name the emotional or practical state change the craving is seeking.",
+          "Look at the reward that teaches the loop to repeat."
+        ],
+        result:
+          "The behavior becomes easier to redesign because you can intervene at the cue, craving, response, or reward instead of treating the whole habit as a character flaw."
       }
     ],
     whyThisMatters:
@@ -335,13 +321,8 @@ const atomicSections: CurriculumSection[] = [
           "Many bad habits are effective short-term solutions with costly long-term consequences."
       }
     ],
-    reflection:
-      "Which habit makes more sense when you view it as an attempt to change your internal state?",
-    exercises: [
-      "Map one habit loop in writing.",
-      "Name the craving behind the behavior.",
-      "Design one replacement that satisfies the craving with fewer downstream costs."
-    ],
+    applicationLens:
+      "When a habit is failing, diagnose the loop before changing the plan. A behavior that looks irrational from the outside often makes sense as an attempt to shift an internal state. Better design begins by preserving the legitimate need while changing the cue, response, or reward that carries unnecessary cost.",
     anchors: [
       "Cue predicts. Craving wants. Response acts. Reward teaches.",
       "Change the loop, not just the visible behavior."
@@ -428,15 +409,15 @@ const atomicSections: CurriculumSection[] = [
           "This shifts the solution from self-blame to cue design."
       },
       {
-        type: "exercise",
-        title: "Design one obvious cue",
-        instructions:
-          "Choose one habit and give it a specific time, place, anchor, and visible cue.",
-        prompts: [
-          "When and where will this happen?",
-          "What existing habit can it follow?",
-          "What object or signal should be visible in that location?"
-        ]
+        type: "application",
+        context: "Designing an obvious cue",
+        steps: [
+          "Attach the habit to a specific time, place, or existing routine.",
+          "Place a visible cue in the context where the behavior should begin.",
+          "Remove ambiguity by deciding the start conditions before the moment arrives."
+        ],
+        result:
+          "Clarity does part of the work that motivation usually gets asked to do."
       }
     ],
     whyThisMatters:
@@ -455,13 +436,8 @@ const atomicSections: CurriculumSection[] = [
           "Cue design is attention architecture: arranging the environment so the right behavior comes to mind at the right time."
       }
     ],
-    reflection:
-      "Which useful behavior is currently invisible in the moment when it should happen?",
-    exercises: [
-      "Create a habit scorecard for one hour of your day.",
-      "Write one implementation intention.",
-      "Place one physical cue where the behavior starts."
-    ],
+    applicationLens:
+      "Make it obvious by letting the environment and schedule carry the reminder. Habit scorecards reveal what already happens; implementation intentions decide when and where the new behavior belongs; habit stacking attaches it to a routine that is already stable.",
     anchors: [
       "Make the cue visible where the behavior begins.",
       "The environment can remember for you."
@@ -525,15 +501,15 @@ const atomicSections: CurriculumSection[] = [
         but: "Adding enough immediate meaning, progress, or satisfaction that the habit becomes easier to approach."
       },
       {
-        type: "exercise",
-        title: "Add legitimate attraction",
-        instructions:
-          "Choose a useful habit you avoid and add one source of appeal that does not undermine it.",
-        prompts: [
-          "What makes the habit feel aversive right now?",
-          "What reward would support the habit rather than distract from it?",
-          "What social or environmental cue could make the behavior feel more normal?"
-        ]
+        type: "application",
+        context: "Adding legitimate attraction",
+        steps: [
+          "Identify what makes the useful habit feel aversive in the present.",
+          "Pair it with a reward, context, or social signal that supports the habit instead of distracting from it.",
+          "Reduce exposure to cues that make the competing behavior feel more appealing."
+        ],
+        result:
+          "The habit becomes easier to approach emotionally, not merely easier to justify intellectually."
       }
     ],
     whyThisMatters:
@@ -552,13 +528,8 @@ const atomicSections: CurriculumSection[] = [
           "A serious habit can be designed to feel meaningful, satisfying, and worth returning to."
       }
     ],
-    reflection:
-      "Which good habit do you resist because it has no immediate emotional reward?",
-    exercises: [
-      "Create one temptation bundle for a low-cognitive habit.",
-      "Name one social environment that makes your desired habit more normal.",
-      "Remove one cue that makes the competing habit more attractive."
-    ],
+    applicationLens:
+      "Attraction design works best when it adds real emotional pull without corrupting the behavior. A walk paired with a favorite podcast, a study block inside a serious learning community, or a clean workspace that signals focus can make the desired behavior feel more natural before discipline is required.",
     anchors: [
       "Anticipation creates desire.",
       "Make the habit worth approaching, not merely worth admiring."
@@ -606,7 +577,7 @@ const atomicSections: CurriculumSection[] = [
         columns: ["Behavior", "Reduce friction", "Add friction"],
         rows: [
           ["Reading", "Place book where the routine starts", "Keep phone outside the room"],
-          ["Exercise", "Pack clothes the night before", "Remove easy excuses by scheduling with a friend"],
+          ["Training", "Pack clothes the night before", "Remove easy excuses by scheduling with a friend"],
           ["Spending", "Automate saving first", "Remove saved cards and add a waiting period"],
           ["Deep work", "Open the document in advance", "Block communication tools for the first interval"]
         ]
@@ -622,15 +593,15 @@ const atomicSections: CurriculumSection[] = [
           "The entry point is small enough to begin, and once motion starts, continuation becomes more likely."
       },
       {
-        type: "exercise",
-        title: "Redesign the first two minutes",
-        instructions:
-          "Choose one avoided habit and make only the beginning easier.",
-        prompts: [
-          "What is the true first action?",
-          "What setup can happen before the habit window?",
-          "What bad habit needs added friction before the vulnerable moment?"
-        ]
+        type: "application",
+        context: "Redesigning the first two minutes",
+        steps: [
+          "Find the true first action, not the ideal full session.",
+          "Prepare tools, clothes, files, or context before the habit window.",
+          "Add friction to the competing behavior before the vulnerable moment."
+        ],
+        result:
+          "The desired habit becomes easier to start, and the competing habit becomes less automatic."
       }
     ],
     whyThisMatters:
@@ -649,13 +620,8 @@ const atomicSections: CurriculumSection[] = [
           "Easy starts are entry points. They help serious behaviors happen consistently enough to grow."
       }
     ],
-    reflection:
-      "Which habit would change if you designed the first two minutes instead of the full ideal session?",
-    exercises: [
-      "Define the two-minute version of one habit.",
-      "Prepare one tool or environment before the habit window.",
-      "Add one unit of friction to a competing behavior."
-    ],
+    applicationLens:
+      "The easiest point of leverage is often the beginning. A habit that feels too large can usually be redesigned around a first action: opening the document, putting on shoes, reading one page, preparing the transfer. Once starting becomes normal, intensity can grow without carrying the whole system at the beginning.",
     anchors: [
       "Make the start easy enough to repeat.",
       "Spend friction where you want hesitation."
@@ -692,7 +658,7 @@ const atomicSections: CurriculumSection[] = [
       "But tracking has a shadow side. If the tracker becomes a perfection scoreboard, it can turn one miss into shame. The point is not to worship the streak. The point is to create feedback, satisfaction, and repair. A missed day is not a verdict; it is information. The useful question is what broke: cue, craving, response, reward, friction, or context?",
       "Immediate rewards should be aligned. Rewarding a workout with behavior that undermines health may teach the wrong lesson. Rewarding a savings transfer with impulsive spending can erase the habit's meaning. Better rewards point in the same direction: visible progress, a recovery ritual, a clean reset, or a moment of identity recognition.",
       "This law is especially important for learning. The payoff of study is often delayed, so the learner needs immediate signals: a recall question answered, an idea applied, a note connected, a concept explained. The mind needs to feel that attention produced something usable.",
-      "Delayed outcomes create an emotional mismatch. The rational part of you may know that sleep, saving, training, and study matter. The habit system still learns from what happens soon after action. If the only reward is months away, the behavior asks a lot from patience. A visible tracker, a short reflection, a cleaner room, or a sense of closure can bridge that timing gap.",
+      "Delayed outcomes create an emotional mismatch. The rational part of you may know that sleep, saving, training, and study matter. The habit system still learns from what happens soon after action. If the only reward is months away, the behavior asks a lot from patience. A visible tracker, a brief progress note, a cleaner room, or a sense of closure can bridge that timing gap.",
       "Obsessive tracking usually happens when the metric becomes more important than the behavior it was meant to support. Step counts can replace health judgment. Reading streaks can replace comprehension. Budget categories can replace thoughtful financial choices. The measure should serve the habit, not become the habit. If tracking increases anxiety and reduces learning, simplify it.",
       "A satisfying habit does not need constant celebration. Often the best reward is quiet evidence: I kept the promise, I returned after a miss, I made progress visible, I can trust this system a little more. That kind of satisfaction is mature. It reinforces identity without turning habit change into a prize economy."
     ],
@@ -713,15 +679,15 @@ const atomicSections: CurriculumSection[] = [
           "The reward becomes immediate identity evidence rather than a distant abstraction."
       },
       {
-        type: "exercise",
-        title: "Design an aligned reward",
-        instructions:
-          "Add immediate satisfaction to a habit without undermining the behavior.",
-        prompts: [
-          "What delayed benefit does this habit create?",
-          "What immediate signal could represent progress?",
-          "What reward would accidentally teach the wrong behavior?"
-        ]
+        type: "application",
+        context: "Designing an aligned reward",
+        steps: [
+          "Clarify the delayed benefit the habit is meant to create.",
+          "Choose an immediate signal that represents progress without undermining the habit.",
+          "Use tracking as visibility, not as a scoreboard for self-judgment."
+        ],
+        result:
+          "Near-term satisfaction keeps the habit alive long enough for delayed benefits to arrive."
       }
     ],
     whyThisMatters:
@@ -740,13 +706,8 @@ const atomicSections: CurriculumSection[] = [
           "Good tracking is about feedback, visibility, satisfaction, and repair."
       }
     ],
-    reflection:
-      "Which good habit needs a better present-tense reward to survive long enough for delayed benefits to arrive?",
-    exercises: [
-      "Create one visible progress signal.",
-      "Define one aligned reward for completion.",
-      "Write a recovery rule for the first missed day."
-    ],
+    applicationLens:
+      "Good habits often need a present-tense reward because their deepest benefits arrive late. A visible streak, a completed note, a calmer evening, or a small aligned ritual can make the behavior satisfying now without teaching the wrong lesson.",
     anchors: [
       "Immediate satisfaction teaches repetition.",
       "Track to see, not to shame."
@@ -821,15 +782,15 @@ const atomicSections: CurriculumSection[] = [
           "The cue is removed, friction is added, and the underlying need for recovery receives a better path."
       },
       {
-        type: "exercise",
-        title: "Invert one unwanted loop",
-        instructions:
-          "Choose one bad habit and redesign it through the inverse four laws.",
-        prompts: [
-          "What cue can be removed or hidden?",
-          "What craving does the habit satisfy?",
-          "What replacement can satisfy that craving with fewer costs?"
-        ]
+        type: "application",
+        context: "Inverting an unwanted loop",
+        steps: [
+          "Remove or hide the cue before the habit begins.",
+          "Make the habit less attractive by seeing the real cost and identifying the craving beneath it.",
+          "Add friction and choose a replacement that satisfies the underlying need with fewer downstream costs."
+        ],
+        result:
+          "The unwanted habit loses some of its automatic pull without requiring shame as the control system."
       }
     ],
     whyThisMatters:
@@ -848,13 +809,8 @@ const atomicSections: CurriculumSection[] = [
           "Desire matters, but the loop must be redesigned for moments when desire is not enough."
       }
     ],
-    reflection:
-      "What unwanted habit are you trying to remove without replacing the job it performs?",
-    exercises: [
-      "Write the cue, craving, response, and reward of one bad habit.",
-      "Apply the inverse four laws.",
-      "Choose a replacement behavior that satisfies the real craving."
-    ],
+    applicationLens:
+      "Breaking a bad habit works better when the system changes before the vulnerable moment. Phone use, junk food, procrastination, and overspending usually perform a job: stimulation, relief, avoidance, or status. Replace the job and redesign the friction instead of trying to shame the behavior away.",
     anchors: [
       "Make bad habits invisible, unattractive, difficult, and unsatisfying.",
       "Replace the job, not just the behavior."
@@ -913,15 +869,15 @@ const atomicSections: CurriculumSection[] = [
           "The system turns a desired capability into repeated behavior and feedback."
       },
       {
-        type: "exercise",
-        title: "Convert a goal into a system",
-        instructions:
-          "Choose one goal and translate it into a weekly operating rhythm.",
-        prompts: [
-          "What behavior would make this goal more likely?",
-          "When will that behavior repeat?",
-          "What feedback will you review weekly?"
-        ]
+        type: "application",
+        context: "Converting a goal into a system",
+        steps: [
+          "Use the goal as a direction marker, not the plan itself.",
+          "Define the weekly behavior that makes the goal more likely.",
+          "Review a leading behavior or feedback signal that can improve the system."
+        ],
+        result:
+          "The goal becomes an operating rhythm the reader can actually repeat."
       }
     ],
     whyThisMatters:
@@ -940,13 +896,8 @@ const atomicSections: CurriculumSection[] = [
           "Goals set direction. Systems make movement repeatable."
       }
     ],
-    reflection:
-      "Which goal in your life has a destination but no operating system?",
-    exercises: [
-      "Write one goal.",
-      "Define the weekly behavior that supports it.",
-      "Create one review question for the system."
-    ],
+    applicationLens:
+      "The fastest way to make a goal more useful is to translate it into a repeatable operating rhythm. Career goals become protected blocks and review loops. Money goals become automation and spending rules. Health goals become default meals, movement cues, and recovery plans.",
     anchors: [
       "Goals point. Systems move.",
       "The plan is what repeats."
@@ -1021,15 +972,15 @@ const atomicSections: CurriculumSection[] = [
           "The recovery behavior protects identity and prevents disruption from becoming abandonment."
       },
       {
-        type: "exercise",
-        title: "Design a recovery rule",
-        instructions:
-          "Choose one habit and decide what happens after the first miss.",
-        prompts: [
-          "What is the minimum viable version?",
-          "When will you do it after a miss?",
-          "What will you inspect without self-attack?"
-        ]
+        type: "application",
+        context: "Designing a recovery rule",
+        steps: [
+          "Define the minimum viable version before disruption happens.",
+          "Decide how quickly the habit should return after a miss.",
+          "Review the cue, friction, and context without turning the miss into self-attack."
+        ],
+        result:
+          "The habit system becomes flexible enough to survive stress, travel, illness, and busy seasons."
       }
     ],
     whyThisMatters:
@@ -1048,13 +999,8 @@ const atomicSections: CurriculumSection[] = [
           "Advanced design usually means clearer loops, better recovery, and more disciplined review."
       }
     ],
-    reflection:
-      "What habit needs diagnosis and recovery rules more than it needs another motivational restart?",
-    exercises: [
-      "Run the four-law diagnosis on one habit.",
-      "Define a minimum viable version.",
-      "Schedule a weekly review for the next four weeks."
-    ],
+    applicationLens:
+      "Advanced habit design is often less about adding complexity and more about building recovery into the system. The mature question is what the habit does after stress, travel, illness, or interruption. A clear minimum version and a calm review ritual make the system resilient.",
     anchors: [
       "Diagnose the loop before restarting the habit.",
       "Consistency is the skill of returning quickly."
@@ -1123,15 +1069,15 @@ const atomicSections: CurriculumSection[] = [
           "The habit turns reading into retrieval and use, which makes the ideas more durable."
       },
       {
-        type: "exercise",
-        title: "Choose one domain playbook",
-        instructions:
-          "Pick one domain and design a keystone habit through cue, response, reward, and review.",
-        prompts: [
-          "Which domain would benefit most from one reliable habit?",
-          "What repeated behavior would create leverage?",
-          "How will the four laws shape that behavior?"
-        ]
+        type: "application",
+        context: "Choosing a domain playbook",
+        steps: [
+          "Start with one domain where a reliable behavior would create leverage.",
+          "Choose the keystone behavior rather than redesigning the entire domain.",
+          "Adapt the four laws to that domain's real cues, rewards, constraints, and failure points."
+        ],
+        result:
+          "The framework transfers from the book into ordinary decisions without flattening every domain into the same template."
       }
     ],
     whyThisMatters:
@@ -1150,13 +1096,8 @@ const atomicSections: CurriculumSection[] = [
           "The same principles transfer, but each domain has different cues, rewards, constraints, and risks."
       }
     ],
-    reflection:
-      "Which domain of your life would change most if one keystone habit became reliable?",
-    exercises: [
-      "Select one domain: work, health, learning, money, or relationships.",
-      "Write the keystone behavior.",
-      "Design its cue, easy start, reward, and review."
-    ],
+    applicationLens:
+      "A practical playbook should choose one high-leverage behavior in one domain and design it with the local context in mind. Work habits are usually attention systems; health habits are often default-design systems; learning habits require recall; money habits need automation and friction; relationship habits make care visible in ordinary moments.",
     anchors: [
       "Principles transfer; playbooks adapt.",
       "Choose one domain and make one high-leverage behavior reliable."
@@ -1226,17 +1167,15 @@ const atomicSections: CurriculumSection[] = [
         ]
       },
       {
-        type: "exercise",
-        title: "Build your implementation blueprint",
-        instructions:
-          "Design one habit from identity through weekly review. Keep it narrow enough to begin this week.",
-        prompts: [
-          "Identity: I am becoming someone who...",
-          "Cue: this starts when...",
-          "Easy response: the minimum action is...",
-          "Reward: the immediate satisfaction is...",
-          "Review: each week I will ask..."
-        ]
+        type: "application",
+        context: "Reading the implementation blueprint",
+        steps: [
+          "Identity names the direction of change.",
+          "Behavior defines the smallest serious evidence.",
+          "Loop design makes the cue, response, reward, recovery, and review visible."
+        ],
+        result:
+          "The blueprint keeps the framework practical without turning the curriculum into a workbook."
       },
       {
         type: "synthesis",
@@ -1260,13 +1199,8 @@ const atomicSections: CurriculumSection[] = [
           "The final step is to design a system that makes the next repetition clear under ordinary conditions."
       }
     ],
-    reflection:
-      "What is the one habit that would make the next season of your life easier, clearer, or more aligned?",
-    exercises: [
-      "Complete the habit blueprint.",
-      "Schedule the first week of repetitions.",
-      "Set a review appointment four weeks from now."
-    ],
+    applicationLens:
+      "The simplest way to carry the book forward is to choose one habit that would make the next season easier, clearer, or more aligned. Give it an identity, a cue, an easy start, an immediate reward, a recovery rule, and a weekly review. Then let the system run long enough to teach you something.",
     anchors: [
       "Design one loop. Run it. Learn. Then scale.",
       "Identity gives direction; systems create repetition; review keeps the system alive."
